@@ -51,3 +51,9 @@ DERNIÈRE MISE À JOUR
 ⏰ 17:11:00
 📆 31/05/2026 17:11:00
 📁 Fichier: dicko.txt
+
+DERNIÈRE MISE À JOUR
+📅 31/05/2026
+⏰ 17:36:04
+📆 31/05/2026 17:36:04
+📁 Fichier: prom.txt
