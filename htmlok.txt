@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>QCM - Possessifs & Démonstratifs (Ordre aléatoire)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0f2b36, #1a4a5f);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .quiz-container {
+            max-width: 700px;
+            width: 100%;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .quiz-header {
+            background: #0f2c3d;
+            padding: 1rem;
+            text-align: center;
+            position: relative;
+        }
+        .quiz-header h1 { color: #ffdd99; font-size: 1.3rem; }
+        .update-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #ffb347;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .progress-bar {
+            background: #eef2f7;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+        .badge {
+            background: #1d4e6e;
+            color: white;
+            padding: 4px 15px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+        }
+        .score-badge { background: #2b7a4b; }
+        .question-area { padding: 1.5rem; }
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #0a2f44;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid #ffb347;
+            padding-left: 18px;
+        }
+        .options-list { display: flex; flex-direction: column; gap: 12px; }
+        .option-card {
+            background: #f8fafc;
+            border-radius: 60px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid #e2edf7;
+            transition: all 0.2s;
+        }
+        .option-card:hover { background: #eef4ff; transform: translateX(5px); border-color: #ffb347; }
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            background: #cbdde9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .option-card.selected { background: #ffefd6; border: 2px solid #ffb347; }
+        .option-card.selected .option-letter { background: #ffb347; color: white; }
+        .final-report {
+            background: #eef3fc;
+            margin: 1rem;
+            border-radius: 20px;
+            padding: 1.2rem;
+        }
+        .final-header { font-size: 1.3rem; font-weight: bold; text-align: center; }
+        .final-score {
+            background: #1d4e6e;
+            color: white;
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 60px;
+            text-align: center;
+            margin: 10px auto;
+        }
+        .questions-list { max-height: 400px; overflow-y: auto; margin-top: 15px; }
+        .question-summary {
+            background: white;
+            border-radius: 16px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-left: 5px solid;
+            font-size: 0.85rem;
+        }
+        .question-summary.correct { border-left-color: #2b7a4b; }
+        .question-summary.wrong { border-left-color: #c0392b; }
+        .restart-btn {
+            background: #ffb347;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            display: block;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .shuffle-btn {
+            background: #1d4e6e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            display: block;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            color: white;
+        }
+        .text-center { text-align: center; }
+        footer { font-size: 0.7rem; text-align: center; padding: 0.8rem; color: #6b8ba0; }
+        .loading { text-align: center; padding: 2rem; font-size: 1.2rem; color: #0f2c3d; }
+        .error { background: #ffe0e0; color: #c0392b; padding: 1rem; margin: 1rem; border-radius: 1rem; text-align: center; }
+        .info-cache { font-size: 0.65rem; text-align: center; padding: 5px; background: #eef2f7; color: #1d4e6e; }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2b7a4b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            z-index: 1000;
+            animation: fadeOut 3s ease forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    <div class="quiz-header">
+        <h1 id="quizTitle">📚 QCM - Possessifs & Démonstratifs</h1>
+        <button class="update-btn" id="updateBtn">🔄 Mettre à jour</button>
+    </div>
+    <div id="contentArea">
+        <div class="loading">⏳ Chargement des questions...</div>
+    </div>
+    <div id="cacheInfo" class="info-cache"></div>
+    <footer>✅ Cliquez sur "Mélanger" pour changer l'ordre des questions | "Recommencer" pour refaire</footer>
+</div>
+
+<script>
+    const TXT_URL = 'https://mkzycqybalkruacdtnew.supabase.co/storage/v1/object/public/Nahy/Format.txt';
+    const DB_NAME = 'QCM_Database';
+    const DB_VERSION = 6;
+    const STORE_NAME = 'qcm_data';
+    
+    let db = null;
+    let originalQuestions = [];     // Stocke les questions originales (dans l'ordre du fichier)
+    let currentQuestions = [];      // Stocke les questions mélangées
+    let quizTitle = "QCM - Possessifs & Démonstratifs";
+    let currentIdx = 0, userSelections = [], isLocked = [], currentScore = 0, quizFinished = false, isLoading = false;
+    
+    const contentArea = document.getElementById('contentArea');
+    const quizTitleEl = document.getElementById('quizTitle');
+    const updateBtn = document.getElementById('updateBtn');
+    const cacheInfo = document.getElementById('cacheInfo');
+    
+    // ==================== MÉLANGE ALOÉATOIRE (Fisher-Yates) ====================
+    function shuffleArray(array) {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+    
+    // ==================== MÉLANGER LES QUESTIONS ====================
+    function shuffleQuestions() {
+        if (!originalQuestions || originalQuestions.length === 0) return;
+        currentQuestions = shuffleArray(originalQuestions);
+        resetQuizState();
+        showToast("🃏 Ordre des questions mélangé !");
+    }
+    
+    // ==================== INDEXEDDB ====================
+    function openDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => { db = request.result; resolve(db); };
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                }
+            };
+        });
+    }
+    
+    async function saveToDB(data) {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.put({ id: 'qcm_data', ...data, timestamp: Date.now() });
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+    
+    async function loadFromDB() {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get('qcm_data');
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+    
+    async function clearCache() {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.delete('qcm_data');
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+    
+    // ==================== PARSER ====================
+    function parseTextFile(content) {
+        const lines = content.split('\n');
+        let title = "QCM - Possessifs & Démonstratifs";
+        const questionsList = [];
+        let currentQuestion = null, currentOptions = [], currentCorrect = null;
+        
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (line === "") continue;
+            if (line.startsWith('TITRE:')) {
+                title = line.replace('TITRE:', '').trim();
+                quizTitleEl.innerText = title;
+                continue;
+            }
+            if (line.startsWith('## CORRECTION')) break;
+            
+            const questionMatch = line.match(/^(\d+)\.\s+(.+)$/);
+            if (questionMatch) {
+                if (currentQuestion !== null && currentOptions.length > 0) {
+                    questionsList.push({ q: currentQuestion, options: [...currentOptions], correct: currentCorrect });
+                }
+                currentQuestion = questionMatch[2];
+                currentOptions = [];
+                currentCorrect = null;
+                continue;
+            }
+            
+            const starOptionMatch = line.match(/^\*([A-D])\)\s+(.+)$/);
+            if (starOptionMatch && currentQuestion !== null) {
+                currentCorrect = starOptionMatch[1];
+                currentOptions.push(starOptionMatch[2].trim());
+                continue;
+            }
+            
+            const normalOptionMatch = line.match(/^([A-D])\)\s+(.+)$/);
+            if (normalOptionMatch && currentQuestion !== null) {
+                currentOptions.push(normalOptionMatch[2].trim());
+                continue;
+            }
+        }
+        
+        if (currentQuestion !== null && currentOptions.length > 0) {
+            questionsList.push({ q: currentQuestion, options: [...currentOptions], correct: currentCorrect });
+        }
+        
+        console.log("✅ Questions parsées:", questionsList.length);
+        return { title, questions: questionsList };
+    }
+    
+    // ==================== TÉLÉCHARGEMENT ====================
+    async function downloadFromServer() {
+        try {
+            const response = await fetch(TXT_URL, { cache: 'no-cache' });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const content = await response.text();
+            const parsed = parseTextFile(content);
+            if (!parsed.questions || parsed.questions.length === 0) throw new Error("Aucune question trouvée");
+            await saveToDB({ title: parsed.title, questions: parsed.questions, lastUpdate: Date.now() });
+            return parsed;
+        } catch (error) {
+            console.error("Erreur téléchargement:", error);
+            throw error;
+        }
+    }
+    
+    // ==================== MISE À JOUR ====================
+    async function forceUpdate() {
+        if (isLoading) { showToast("⏳ Déjà en cours..."); return; }
+        isLoading = true;
+        updateBtn.disabled = true;
+        updateBtn.textContent = "⏳ Téléchargement...";
+        contentArea.innerHTML = '<div class="loading">🔄 Mise à jour en cours...</div>';
+        
+        try {
+            await clearCache();
+            const data = await downloadFromServer();
+            originalQuestions = data.questions;
+            currentQuestions = shuffleArray(originalQuestions);  // Déjà mélangé
+            quizTitle = data.title;
+            quizTitleEl.innerText = quizTitle;
+            resetQuizState();
+            showToast("✅ Mise à jour réussie !");
+            cacheInfo.innerHTML = `📅 Dernière mise à jour : ${new Date().toLocaleString()} (fichier rechargé)`;
+        } catch (error) {
+            const cached = await loadFromDB();
+            if (cached && cached.questions && cached.questions.length > 0) {
+                originalQuestions = cached.questions;
+                currentQuestions = shuffleArray(originalQuestions);
+                quizTitle = cached.title;
+                quizTitleEl.innerText = quizTitle;
+                resetQuizState();
+                showToast("⚠️ Serveur inaccessible, utilisation du cache");
+                cacheInfo.innerHTML = `⚠️ Cache du ${new Date(cached.timestamp).toLocaleString()}`;
+            } else {
+                contentArea.innerHTML = `<div class="error">❌ Erreur : ${error.message}<br><button onclick="location.reload()" style="margin-top:10px;padding:8px 16px;background:#1d4e6e;color:white;border:none;border-radius:40px;">🔄 Réessayer</button></div>`;
+                showToast("❌ Échec de la mise à jour");
+            }
+        } finally {
+            isLoading = false;
+            updateBtn.disabled = false;
+            updateBtn.textContent = "🔄 Mettre à jour";
+        }
+    }
+    
+    // ==================== CHARGEMENT ====================
+    async function loadQCMData() {
+        try {
+            await openDB();
+            const cached = await loadFromDB();
+            if (cached && cached.questions && cached.questions.length > 0) {
+                cacheInfo.innerHTML = `📦 Cache du ${new Date(cached.timestamp).toLocaleString()}<br>🔄 Cliquez sur "Mélanger" pour changer l'ordre des questions`;
+                return { title: cached.title, questions: cached.questions };
+            }
+            cacheInfo.innerHTML = `🌐 Premier téléchargement...`;
+            return await downloadFromServer();
+        } catch (error) {
+            const cached = await loadFromDB();
+            if (cached && cached.questions && cached.questions.length > 0) {
+                cacheInfo.innerHTML = `⚠️ Cache de secours`;
+                return { title: cached.title, questions: cached.questions };
+            }
+            throw error;
+        }
+    }
+    
+    // ==================== QUIZ ====================
+    function resetQuizState() {
+        currentIdx = 0;
+        userSelections = new Array(currentQuestions.length).fill(null);
+        isLocked = new Array(currentQuestions.length).fill(false);
+        currentScore = 0;
+        quizFinished = false;
+        renderCurrent();
+    }
+    
+    function renderCurrent() {
+        if (quizFinished || !currentQuestions || currentQuestions.length === 0) return;
+        const q = currentQuestions[currentIdx];
+        if (!q) return;
+        
+        const alreadyAnswered = (userSelections[currentIdx] !== null);
+        const letters = ['A', 'B', 'C', 'D'];
+        let optsHtml = '';
+        q.options.forEach((opt, idx) => {
+            const letter = letters[idx];
+            const selectedClass = (alreadyAnswered && userSelections[currentIdx] === letter) ? 'selected' : '';
+            optsHtml += `<div class="option-card ${selectedClass}" data-opt-letter="${letter}"><div class="option-letter">${letter}</div><span class="option-text">${opt}</span></div>`;
+        });
+        
+        // Ajouter un bouton Mélanger dans la barre de progression
+        const html = `<div class="progress-bar"><span class="badge" id="qCounter">Question ${currentIdx+1} / ${currentQuestions.length}</span><span class="badge score-badge" id="liveScore">🎯 Score : ${currentScore} / ${currentQuestions.length}</span></div><div class="question-area"><div class="question-text">${currentIdx+1}. ${q.q}</div><div class="options-list" id="optionsContainer">${optsHtml}</div><button class="shuffle-btn" id="shuffleBtn">🃏 Mélanger l'ordre</button></div>`;
+        contentArea.innerHTML = html;
+        
+        // Événement pour le bouton Mélanger
+        document.getElementById('shuffleBtn')?.addEventListener('click', () => {
+            if (!quizFinished && !isLocked[currentIdx]) {
+                shuffleQuestions();
+            } else {
+                showToast("❌ Vous ne pouvez pas mélanger en cours de quiz ! Terminez ou recommencez d'abord.");
+            }
+        });
+        
+        if (!alreadyAnswered && !isLocked[currentIdx] && !quizFinished) {
+            document.querySelectorAll('.option-card').forEach(div => {
+                div.addEventListener('click', () => {
+                    if (isLocked[currentIdx] || quizFinished) return;
+                    const chosenLetter = div.getAttribute('data-opt-letter');
+                    if (chosenLetter) handleAnswer(chosenLetter);
+                });
+            });
+        }
+    }
+    
+    function handleAnswer(selectedLetter) {
+        if (isLocked[currentIdx] || quizFinished) return;
+        isLocked[currentIdx] = true;
+        const q = currentQuestions[currentIdx];
+        if (selectedLetter === q.correct) currentScore++;
+        userSelections[currentIdx] = selectedLetter;
+        renderCurrent();
+        setTimeout(() => {
+            if (currentIdx + 1 < currentQuestions.length) { currentIdx++; renderCurrent(); }
+            else finishQuiz();
+        }, 300);
+    }
+    
+    function finishQuiz() {
+        quizFinished = true;
+        const totalCorrect = currentScore;
+        const percent = Math.round((totalCorrect / currentQuestions.length) * 100);
+        let listHtml = `<div class="final-report"><div class="final-header">📊 RÉSULTAT FINAL</div><div class="text-center"><span class="final-score">${totalCorrect} / ${currentQuestions.length} (${percent}%)</span></div><div class="questions-list"><h3>📋 Corrigé complet :</h3>`;
+        for (let i = 0; i < currentQuestions.length; i++) {
+            const q = currentQuestions[i];
+            const userChoice = userSelections[i];
+            const lettersIndex = ['A','B','C','D'];
+            const isOk = (userChoice === q.correct);
+            const userText = userChoice ? q.options[lettersIndex.indexOf(userChoice)] : "(non répondue)";
+            const correctAnswerText = q.options[lettersIndex.indexOf(q.correct)];
+            listHtml += `<div class="question-summary ${isOk ? 'correct' : 'wrong'}"><strong>${isOk ? "✅" : "❌"} Q${i+1} : ${q.q}</strong><br>✏️ Votre réponse : ${userChoice || "—"} → "${userText}"<br>📌 Bonne réponse : ${q.correct} → "${correctAnswerText}"</div>`;
+        }
+        listHtml += `<button class="restart-btn" id="restartQuizBtn">🔄 Recommencer (même ordre)</button><button class="shuffle-btn" id="shuffleRestartBtn">🃏 Recommencer (ordre mélangé)</button></div></div>`;
+        contentArea.innerHTML = `<div class="progress-bar"><span class="badge">Terminé !</span><span class="badge score-badge">🎯 Score final : ${totalCorrect} / ${currentQuestions.length}</span></div>${listHtml}`;
+        
+        document.getElementById('restartQuizBtn')?.addEventListener('click', () => resetQuizState());
+        document.getElementById('shuffleRestartBtn')?.addEventListener('click', () => {
+            shuffleQuestions();
+        });
+    }
+    
+    function showToast(message) {
+        document.querySelector('.toast')?.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    async function init() {
+        try {
+            const data = await loadQCMData();
+            originalQuestions = data.questions;
+            currentQuestions = shuffleArray(originalQuestions);  // Mélanger au démarrage
+            quizTitle = data.title;
+            quizTitleEl.innerText = quizTitle;
+            if (!currentQuestions || currentQuestions.length === 0) throw new Error("Aucune question");
+            resetQuizState();
+        } catch (error) {
+            contentArea.innerHTML = `<div class="error">❌ Erreur : ${error.message}<br><button onclick="location.reload()" style="margin-top:10px;padding:8px 16px;background:#1d4e6e;color:white;border:none;border-radius:40px;">🔄 Réessayer</button></div>`;
+        }
+    }
+    
+    updateBtn.addEventListener('click', forceUpdate);
+    init();
+</script>
+</body>
+</html>
