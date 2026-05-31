@@ -24,29 +24,9 @@ B) Nos
 C) Votre
 D) Leur
 
-5. Regarde _____ arbre magnifique ! (démonstratif)
-*A) ce
-B) cet
-C) cette
-D) ces
-
-6. _____ voiture est rouge. (à moi)
-A) Mon
-*B) Ma
-C) Mes
-D) Ton
-
-7. _____ maison est grande. (à nous)
-*A) Notre
-B) Nos
-C) Votre
-D) Leur
-
 ## CORRECTION
 1. A) Mon  
 2. C) Ton  
 3. C) le sien  
 4. A) Notre  
-5. A) ce  
-6. B) Ma  
-7. A) Notre  
+
