@@ -1,6 +1,0 @@
-<!DOCTYPE html>
-<html>
-<body style="background:white; color:black;">
-lesona1111111111111111111111111
-</body>
-</html>
