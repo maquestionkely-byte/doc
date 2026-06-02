@@ -1,0 +1,6 @@
+<!DOCTYPE html>
+<html>
+<body style="background:white; color:black;">
+miresaka ity
+</body>
+</html>
