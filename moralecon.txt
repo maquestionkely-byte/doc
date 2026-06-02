@@ -1,7 +1,0 @@
-<!DOCTYPE html>
-<html>
-<body style="background:white; color:black;">
-oe  oe oe  oe
-
-</body>
-</html>
