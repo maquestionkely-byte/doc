@@ -1,10 +1,959 @@
 <!DOCTYPE html>
-<html>
+<html lang="mg">
 <head>
     <meta charset="UTF-8">
-    <title>Mon titre</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Fianarana Français - Plateforme Complète</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #1a2a3a 0%, #0f1a24 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container { max-width: 1300px; margin: 0 auto; }
+        
+        .screen { display: none; }
+        .screen.active { display: block; }
+        
+        .welcome-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 1.5rem;
+            box-shadow: 0 30px 30px -20px rgba(0,0,0,0.3);
+            overflow: hidden;
+            margin-bottom: 3px;
+        }
+        .hero-section {
+            background: linear-gradient(112deg, #0f2b3d 0%, #1a3f5c 100%);
+            padding: 1.8rem 2rem 1.5rem;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section::before { content: "🎓"; font-size: 180px; opacity: 0.5; position: absolute; bottom: 175px; left: -20px; pointer-events: none; }
+        .hero-section::after { content: "📖"; font-size: 160px; opacity: 0.15; position: absolute; top: -50px; right: -10px; pointer-events: none; }
+        .title-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            flex-wrap: wrap;
+            margin-bottom: 0.8rem;
+            position: relative;
+            z-index: 2;
+        }
+        .side-image {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #FFD966;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            background-color: #f0f0f0;
+            transition: 0.35s;
+            cursor: pointer;
+        }
+        .side-image:hover { transform: scale(1.1) rotate(3deg); border-color: #FFB347; }
+        .hero-section h1 { font-size: 2.8rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap; }
+        .hero-section h1 i { background: #FFD966; color: #1E3A5F; border-radius: 100px; padding: 14px; font-size: 2.2rem; width: 76px; height: 76px; display: inline-flex; align-items: center; justify-content: center; }
+        .greeting { font-size: 1.3rem; font-weight: 500; background: rgba(255,255,255,0.15); display: inline-block; padding: 0.4rem 1.5rem; border-radius: 60px; margin-bottom: 0.9rem; }
+        .sentence { font-size: 1rem; max-width: 90%; margin: 0.6rem auto 0; background: rgba(0,0,0,0.3); padding: 0.55rem 1.4rem; border-radius: 60px; }
+        .niveau-toolbar {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(8px);
+            border-radius: 60px;
+            padding: 12px 20px;
+            margin: 25px 0 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            border: 1px solid rgba(255,215,0,0.3);
+        }
+        .niveau-label { color: #FFD966; font-weight: 600; }
+        .niveau-btn {
+            background: transparent;
+            border: 2px solid #FFD700;
+            color: #FFD700;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+        .niveau-btn:hover { background: rgba(255,215,0,0.2); transform: scale(1.03); }
+        .niveau-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+        .niveau-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            border-left: 8px solid #0055A4;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .niveau-card:hover { transform: translateX(5px); background: white; }
+        .niveau-info { display: flex; align-items: center; gap: 18px; flex: 2; }
+        .niveau-icon { font-size: 2.5rem; }
+        .niveau-title { font-weight: bold; font-size: 1.2rem; color: #1e3c72; }
+        .niveau-desc { font-size: 0.85rem; color: #666; margin-top: 4px; }
+        .niveau-arrow { font-size: 1.5rem; color: #0055A4; }
+        
+        .page-niveau {
+            background: white;
+            border-radius: 2rem;
+            overflow: hidden;
+        }
+        .bandeau-haut {
+            background: #1e2a3e;
+            padding: 1.4rem 1.8rem;
+            text-align: center;
+        }
+        .bandeau-haut h1 { color: #facc15; font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .bandeau-haut p { color: #cbd5e6; font-size: 0.85rem; }
+        .liste-matiere { padding: 1.6rem 1.8rem 2rem; display: flex; flex-direction: column; gap: 1.2rem; }
+        .bloc-theme {
+            background: #fffcf7;
+            border-radius: 1.5rem;
+            border: 1px solid #f2e2d2;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        .bloc-theme:hover { border-color: #facc1566; box-shadow: 0 10px 20px -8px rgba(0,0,0,0.08); }
+        .lecon-click {
+            padding: 0.9rem 1.2rem 0.7rem;
+            background: #ffffff;
+            border-bottom: 1px solid #f3e7db;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .lecon-click:hover { background: #fffaf2; }
+        .titre-rond { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.2rem; }
+        .rond-jaune {
+            background: #facc15;
+            color: #1e293b;
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+        .rond-orange {
+            background: #f39c12;
+            color: white;
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 800;
+        }
+        .nom-theme { font-size: 1.2rem; font-weight: 700; color: #2c3e4f; }
+        .sous-accroche { font-size: 0.75rem; color: #6b7c93; margin-top: 0.25rem; margin-left: 3rem; }
+        .barre-exercice {
+            background: #eef2f7;
+            margin: 0.4rem 1rem 0.9rem;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.4rem 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #dee4ec;
+        }
+        .barre-exercice:hover { background: #facc15; transform: scale(0.99); }
+        .texte-exo { font-weight: 600; font-size: 0.8rem; color: #2c3e50; }
+        .btn-retour {
+            background: #0055A4;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px auto;
+            display: inline-block;
+        }
+        .btn-retour:hover { background: #003f7a; }
+        .footer-info { background: #f1f5f9; padding: 0.7rem; text-align: center; font-size: 0.7rem; color: #4a5b6e; }
+        .text-center { text-align: center; }
+        
+        .footer { text-align: center; margin-top: 40px; color: #aaa; font-size: 0.8rem; }
+        .mantra { text-align: center; color: #ffd966; margin: 20px 0; font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; }
+        
+        .modal-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 20000;
+            display: flex;
+            flex-direction: column;
+            overflow: auto;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-fullscreen-header {
+            background: #0f2c3d;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .modal-fullscreen-header h2 {
+            color: #ffdd99;
+            margin: 0;
+            font-size: 1.3rem;
+        }
+        .btn-close-fullscreen {
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-close-fullscreen:hover { background: #dc2626; transform: scale(1.05); }
+        
+        .modal-fullscreen-body {
+            flex: 1;
+            padding: 20px;
+            background: #f5f7fb;
+            overflow-y: auto;
+        }
+        
+        .error-notification {
+            background: #fee2e2;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            margin: 1rem;
+        }
+        .error-notification i { font-size: 3rem; color: #c0392b; margin-bottom: 1rem; display: block; }
+        .error-notification p { margin: 0.5rem 0; color: #333; }
+        .error-url {
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        .error-hint {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+        
+        .toast-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2b7a4b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            z-index: 20001;
+            animation: fadeOut 3s ease forwards;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        /* Barre de navigation flottante pour le contenu HTML chargé */
+        .floating-nav-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e2a3e;
+            backdrop-filter: blur(10px);
+            border-radius: 60px;
+            padding: 8px 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 9999;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border: 1px solid #facc1566;
+        }
+        .floating-nav-bar button {
+            background: #facc15;
+            color: #1e2a3e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .floating-nav-bar button:hover {
+            background: #ffdd66;
+            transform: scale(1.02);
+        }
+        .floating-nav-bar .btn-back {
+            background: #0055A4;
+            color: white;
+        }
+        .floating-nav-bar .btn-back:hover {
+            background: #003f7a;
+        }
+        
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        
+        @media (max-width: 650px) {
+            .side-image { width: 95px; height: 95px; }
+            .floating-nav-bar button { padding: 8px 16px; font-size: 0.8rem; }
+        }
+    </style>
 </head>
 <body>
-    <h1>🔵😊🟢✅✅✅✅✅</h1>
+<div class="container">
+    
+    <div id="screenAccueil" class="screen active">
+        <div class="welcome-card">
+            <div class="hero-section">
+                <div class="greeting">🥰 Faly miarahaba anao! 😊</div>
+                <div class="title-container">
+                    <img src="https://mkzycqybalkruacdtnew.supabase.co/storage/v1/object/public/Nahy/ok.jpg" alt="Gauche" class="side-image">
+                    <img src="https://mkzycqybalkruacdtnew.supabase.co/storage/v1/object/public/Nahy/Niry.jpg" alt="Droite" class="side-image">
+                </div>
+                <h1><span>Mianatra Français isika</span></h1>
+                <div class="sentence"><i class="fas fa-graduation-cap"></i> Mirary soa amin'ny fianarana français izay ataonao.</div>
+                <div style="font-size: 2.1rem; margin-top: 6px;">Ndao ary e! 😊</div>
+            </div>
+        </div>
+        <div class="niveau-toolbar" id="niveauToolbar"><span class="niveau-label">🎯 Fidio eto :</span></div>
+        <div class="niveau-list" id="niveauList"></div>
+        <div class="mantra">✨ Tsara ny mahay ✨</div>
+    </div>
+    
+    <div id="screenDebutant" class="screen">
+        <div class="page-niveau">
+            <div class="bandeau-haut">
+                <h1>📖 Grammaire française · Débutant A1-A2</h1>
+                <p>📘 Cliquez sur la leçon pour voir le cours | ✏️ Cliquez sur EXERCICES pour choisir un type</p>
+            </div>
+            <div id="debutantContent" class="conteneur-dynamique"></div>
+            <div class="text-center"><button class="btn-retour" onclick="showScreen('accueil')">← Retour à l'accueil</button></div>
+        </div>
+    </div>
+    
+    <div id="screenIntermediaire" class="screen">
+        <div class="page-niveau">
+            <div class="bandeau-haut">
+                <h1><i class="fas fa-leaf"></i> Intermédiaire · B1-B2</h1>
+                <p>📘 Cliquez sur la leçon pour voir le cours | ✏️ Cliquez sur EXERCICES pour choisir un type</p>
+            </div>
+            <div id="intermediaireContent" class="conteneur-dynamique"></div>
+            <div class="text-center"><button class="btn-retour" onclick="showScreen('accueil')">← Retour à l'accueil</button></div>
+        </div>
+    </div>
+    
+    <div id="screenAvance" class="screen">
+        <div class="page-niveau">
+            <div class="bandeau-haut">
+                <h1>🌳 Avancé · C1-C2</h1>
+                <p>📘 Cliquez sur la leçon pour voir le cours | ✏️ Cliquez sur EXERCICES pour choisir un type</p>
+            </div>
+            <div id="avanceContent" class="conteneur-dynamique"></div>
+            <div class="text-center"><button class="btn-retour" onclick="showScreen('accueil')">← Retour à l'accueil</button></div>
+        </div>
+    </div>
+    
+    <div id="screenDictionnaire" class="screen">
+        <div class="simple-page">
+            <i class="fas fa-book"></i>
+            <h2>📖 Dictionnaire</h2>
+            <p>Pas de données pour le moment</p>
+            <button class="btn-retour" onclick="showScreen('accueil')" style="margin-top: 30px;">← Retour à l'accueil</button>
+        </div>
+    </div>
+    
+    <div id="screenConjugaison" class="screen">
+        <div class="simple-page">
+            <i class="fas fa-pen-fancy"></i>
+            <h2>📘 Conjugaison</h2>
+            <p>Pas de données pour le moment</p>
+            <button class="btn-retour" onclick="showScreen('accueil')" style="margin-top: 30px;">← Retour à l'accueil</button>
+        </div>
+    </div>
+    
+    <div id="screenDialoguer" class="screen">
+        <div class="page-niveau">
+            <div class="bandeau-haut">
+                <h1>💬 Dialoguer</h1>
+                <p>Choisissez votre type de dialogue</p>
+            </div>
+            <div style="padding: 30px; text-align: center;">
+                <div style="display: flex; flex-direction: column; gap: 20px; max-width: 400px; margin: 0 auto;">
+                    <button class="niveau-btn" id="btnBilingue" style="background: #1e3c72; color: white; border: none; padding: 15px;">
+                        <i class="fas fa-language"></i> FRANÇAIS & MALAGASY
+                    </button>
+                    <button class="niveau-btn" id="btnFrancaisSeul" style="background: #2a5298; color: white; border: none; padding: 15px;">
+                        <i class="fas fa-comment-dots"></i> FRANÇAIS SEULEMENT
+                    </button>
+                </div>
+                <button class="btn-retour" onclick="showScreen('accueil')" style="margin-top: 30px;">← Retour à l'accueil</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">📖 Tsara ny mianatra 📖</div>
+</div>
+
+<script>
+    // ======================= GESTION DE L'HISTORIQUE ET NAVIGATION =======================
+    // Stocker l'état de la leçon et du type d'exercice pour le retour
+    let dernierContexte = {
+        leconTitre: null,
+        code4: null,
+        niveau: null
+    };
+    
+    // Sauvegarder l'URL de la page principale avant de charger un blob
+    let originalPageUrl = window.location.href;
+    
+    // Fonction pour sauvegarder le contexte avant de charger un exercice
+    function sauvegarderContexte(leconTitre, code4, niveau) {
+        dernierContexte = {
+            leconTitre: leconTitre,
+            code4: code4,
+            niveau: niveau,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('dernierContexteExercice', JSON.stringify(dernierContexte));
+        localStorage.setItem('pagePrincipaleUrl', originalPageUrl);
+    }
+    
+    // Fonction pour revenir à la liste des exercices
+    function revenirAListeExercices() {
+        // Récupérer le contexte sauvegardé
+        const contexteStr = localStorage.getItem('dernierContexteExercice');
+        if (contexteStr) {
+            const contexte = JSON.parse(contexteStr);
+            if (contexte.leconTitre) {
+                // Revenir à la page principale
+                window.location.href = localStorage.getItem('pagePrincipaleUrl') || originalPageUrl;
+                return;
+            }
+        }
+        // Fallback: revenir simplement en arrière
+        window.history.back();
+    }
+    
+    // Fonction pour revenir à l'accueil principal
+    function revenirAccueil() {
+        window.location.href = originalPageUrl;
+    }
+    
+    // Injecter une barre de navigation flottante dans la page chargée (blob)
+    function injecterBarreNavigation(leconTitre, typeExercice) {
+        // Attendre que le DOM soit chargé
+        setTimeout(() => {
+            // Vérifier si la barre existe déjà
+            if (document.getElementById('floatingNavBar')) return;
+            
+            const navBar = document.createElement('div');
+            navBar.id = 'floatingNavBar';
+            navBar.className = 'floating-nav-bar';
+            navBar.innerHTML = `
+                <button class="btn-back" id="backToListBtn"><i class="fas fa-arrow-left"></i> Liste des exercices</button>
+                <button id="backToHomeBtn"><i class="fas fa-home"></i> Accueil</button>
+            `;
+            document.body.appendChild(navBar);
+            
+            // Bouton retour à la liste des exercices
+            document.getElementById('backToListBtn').addEventListener('click', () => {
+                revenirAListeExercices();
+            });
+            
+            // Bouton retour à l'accueil
+            document.getElementById('backToHomeBtn').addEventListener('click', () => {
+                revenirAccueil();
+            });
+            
+            // Gestion du bouton retour Android (popstate)
+            window.addEventListener('popstate', function(event) {
+                revenirAListeExercices();
+            });
+            
+            // Ajouter un état dans l'historique pour que le bouton retour fonctionne
+            history.pushState({ page: "exercice" }, "Exercice", window.location.href);
+        }, 100);
+    }
+    
+    // ======================= DONNÉES DES LEÇONS =======================
+    const leconsDebutant = [
+        { id: 1, titre: "Types de phrases", description: "Phrase affirmative, exclamative, interrogative", cours: "4 types : déclarative, interrogative, exclamative, impérative." },
+        { id: 2, titre: "Pronoms possessifs", description: "le mien, la tienne...", cours: "Remplacent nom + possesseur." },
+{ id: 8, titre: "derakaraessifs", description: "le mien, la tienne...", cours: "Remplacent nom + possesseur." },
+        { id: 3, titre: "Conditionnel", description: "Exprimer une hypothèse", cours: "Le conditionnel présent se forme sur le radical du futur + terminaisons de l'imparfait." }
+    ];
+    
+    const leconsIntermediaire = [
+        { id: 3, titre: "Passé composé", description: "Former le passé composé", cours: "Auxiliaire avoir/être + participe passé." },
+        { id: 4, titre: "Imparfait", description: "Description au passé", cours: "Radical nous présent + ais, ais, ait, ions, iez, aient." },
+        { id: 5, titre: "Futur simple", description: "Exprimer l'avenir", cours: "Infinitif + ai, as, a, ons, ez, ont." },
+        { id: 8, titre: "Discours indirect", description: "Rapporter des paroles", cours: "Changements de temps et de pronoms." }
+    ];
+    
+    const leconsAvance = [
+        { id: 6, titre: "Subjonctif présent", description: "Emploi et conjugaison", cours: "Que je parle, que tu parles..." },
+        { id: 7, titre: "Conditionnel passé", description: "Hypothèse non réalisée", cours: "Aurais parlé, serais allé." },
+        { id: 9, titre: "Plus-que-parfait", description: "Antériorité dans le passé", cours: "Auxiliaire à l'imparfait + participe passé." }
+    ];
+    
+    // ======================= LISTE DES TYPES D'EXERCICES =======================
+    const exercicesEcrits = [
+        { nom: "QCM", code: "qcm", description: "Choisir la bonne réponse parmi plusieurs propositions." },
+        { nom: "Malala", code: "mal", description: "Exercice spécial Malala - Choix multiples." },
+        { nom: "Vrai ou Faux", code: "vra", description: "Indiquer si une affirmation est correcte ou non." },
+{ nom: "testarayx", code: "tes", description: "Indiquer si une affirmation est correcte ou non." },
+        { nom: "Texte à trous", code: "tex", description: "Compléter les mots manquants." },
+        { nom: "Association", code: "ass", description: "Associer les éléments entre eux." }
+    ];
+    
+    // ======================= FONCTION get4Caracteres =======================
+    function get4Caracteres(titre) {
+        let nettoye = titre.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        nettoye = nettoye.replace(/[^a-zA-Z0-9]/g, "");
+        return nettoye.substring(0, 4).toLowerCase();
+    }
+    
+    // ======================= INDEXEDDB DYNAMIQUE =======================
+    async function stockerEnIndexedDB(nomFichier, contenuHTML) {
+        return new Promise((resolve, reject) => {
+            const baseName = nomFichier.replace('.txt', '');
+            const DB_NAME = baseName;
+            const STORE_NAME = baseName;
+            const DB_VERSION = 7;
+            
+            console.log(`📀 [IndexedDB] Ouverture de: ${DB_NAME} (v${DB_VERSION})`);
+            
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            
+            request.onerror = function(event) {
+                console.error("❌ Erreur d'ouverture:", event.target.error);
+                reject(event.target.error);
+            };
+            
+            request.onsuccess = function(event) {
+                const db = event.target.result;
+                const transaction = db.transaction([STORE_NAME], "readwrite");
+                const store = transaction.objectStore(STORE_NAME);
+                
+                const putRequest = store.put(contenuHTML, "htmlContent");
+                
+                putRequest.onsuccess = function() {
+                    console.log(`💾 Stocké dans ${DB_NAME}.${STORE_NAME}`);
+                    db.close();
+                    resolve();
+                };
+                
+                putRequest.onerror = function(event) {
+                    console.error("❌ Erreur stockage:", event.target.error);
+                    db.close();
+                    reject(event.target.error);
+                };
+            };
+            
+            request.onupgradeneeded = function(event) {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    db.createObjectStore(STORE_NAME);
+                    console.log(`📁 Store créé: ${STORE_NAME}`);
+                }
+            };
+        });
+    }
+    
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    // ======================= TÉLÉCHARGER ET OUVRIR =======================
+    async function telechargerEtOuvrir(leconTitre, typeCode, niveau) {
+        const code4 = get4Caracteres(leconTitre);
+        const nomFichier = `${code4}${typeCode}.txt`;
+        const url = `https://raw.githubusercontent.com/maquestionkely-byte/doc/refs/heads/main/${nomFichier}`;
+        
+        // Sauvegarder le contexte pour pouvoir revenir
+        sauvegarderContexte(leconTitre, code4, niveau);
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-fullscreen';
+        modal.innerHTML = `
+            <div class="modal-fullscreen-header">
+                <h2><i class="fas fa-download"></i> Téléchargement - ${leconTitre}</h2>
+                <button class="btn-close-fullscreen" id="closeLoadingBtn">✕</button>
+            </div>
+            <div class="modal-fullscreen-body" style="display: flex; align-items: center; justify-content: center;">
+                <div style="text-align: center;">
+                    <i class="fas fa-spinner fa-pulse" style="font-size: 3rem; color: #1d4e6e;"></i>
+                    <p style="margin-top: 20px;">Téléchargement de ${nomFichier}...</p>
+                    <p style="font-size: 0.8rem; color: #666; margin-top: 10px;">📀 DB: ${code4}${typeCode} (v7)</p>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        const closeBtn = modal.querySelector('#closeLoadingBtn');
+        closeBtn.addEventListener('click', () => modal.remove());
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Fichier non trouvé (HTTP ${response.status})`);
+            }
+            const contenu = await response.text();
+            
+            await stockerEnIndexedDB(nomFichier, contenu);
+            modal.remove();
+            showToast(`✅ ${nomFichier} stocké dans IndexedDB`);
+            
+            // Créer le blob et naviguer
+            const blob = new Blob([contenu], { type: 'text/html' });
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // Sauvegarder les infos de l'exercice pour la barre de navigation
+            sessionStorage.setItem('exerciceInfo', JSON.stringify({
+                leconTitre: leconTitre,
+                typeCode: typeCode,
+                typeNom: exercicesEcrits.find(e => e.code === typeCode)?.nom || typeCode
+            }));
+            
+            window.location.href = blobUrl;
+            
+        } catch (error) {
+            modal.remove();
+            afficherErreur(url, nomFichier, code4, typeCode);
+        }
+    }
+    
+    // ======================= AFFICHER ERREUR =======================
+    function afficherErreur(url, nomFichier, code4, typeCode) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-fullscreen';
+        modal.innerHTML = `
+            <div class="modal-fullscreen-header">
+                <h2><i class="fas fa-exclamation-triangle"></i> Impossible de charger l'exercice</h2>
+                <button class="btn-close-fullscreen" id="closeErrorModal">✕</button>
+            </div>
+            <div class="modal-fullscreen-body">
+                <div class="error-notification">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p><strong>❌ Impossible de charger l'exercice</strong></p>
+                    <div class="error-url">
+                        URL essayée : ${url}
+                    </div>
+                    <p>Le fichier n'existe pas encore. Il sera disponible prochainement.</p>
+                    <div class="error-hint">
+                        💡 <strong>Pour créer ce fichier, nommez-le :</strong> <code>${nomFichier}</code><br>
+                        <span style="font-size: 0.75rem;">📀 Base de données créée: ${code4}${typeCode} (version 7)</span>
+                    </div>
+                    <button class="btn-retour" id="closeErrorBtn" style="margin-top: 20px;">Fermer</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        const closeBtn = modal.querySelector('#closeErrorModal');
+        const closeBtn2 = modal.querySelector('#closeErrorBtn');
+        const closeModal = () => modal.remove();
+        closeBtn.addEventListener('click', closeModal);
+        if (closeBtn2) closeBtn2.addEventListener('click', closeModal);
+    }
+    
+    // ======================= AFFICHER LE COURS (LEÇON) =======================
+    async function afficherLecon(leconTitre, coursTexte) {
+        const code4 = get4Caracteres(leconTitre);
+        const nomFichier = `${code4}lecon.txt`;
+        const url = `https://raw.githubusercontent.com/maquestionkely-byte/doc/refs/heads/main/${nomFichier}`;
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-fullscreen';
+        modal.innerHTML = `
+            <div class="modal-fullscreen-header">
+                <h2><i class="fas fa-book-open"></i> ${leconTitre}</h2>
+                <button class="btn-close-fullscreen" id="closeLeconBtn">✕</button>
+            </div>
+            <div class="modal-fullscreen-body">
+                <div style="max-width: 800px; margin: 0 auto; background: white; border-radius: 1rem; padding: 2rem;">
+                    <div id="leconContenu" style="text-align: center;">
+                        <i class="fas fa-spinner fa-pulse" style="font-size: 2rem; color: #1d4e6e;"></i>
+                        <p>Chargement du cours...</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        const closeBtn = modal.querySelector('#closeLeconBtn');
+        closeBtn.addEventListener('click', () => modal.remove());
+        
+        const conteneur = modal.querySelector('#leconContenu');
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Fichier non trouvé');
+            }
+            const contenu = await response.text();
+            conteneur.innerHTML = `<div style="line-height: 1.6; font-size: 1rem;">${contenu.replace(/\n/g, '<br>')}</div>`;
+        } catch (error) {
+            conteneur.innerHTML = `
+                <div class="error-notification" style="margin: 0;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p><strong>Cours non disponible</strong></p>
+                    <div class="error-url">URL: ${url}</div>
+                    <p>Pour créer ce cours, nommez le fichier : <code>${nomFichier}</code></p>
+                    <hr style="margin: 15px 0;">
+                    <p><strong>Cours par défaut :</strong></p>
+                    <p style="background: #f0f0f0; padding: 15px; border-radius: 8px;">${coursTexte}</p>
+                </div>
+            `;
+        }
+    }
+    
+    // ======================= AFFICHER EXERCICE =======================
+    function afficherContenuExercice(typeExercice, typeCode, leconTitre, niveau) {
+        telechargerEtOuvrir(leconTitre, typeCode, niveau);
+    }
+    
+    function removeExistingModals() {
+        const existingModals = document.querySelectorAll('.modal-fullscreen');
+        existingModals.forEach(modal => modal.remove());
+    }
+    
+    function afficherListeExercices(leconTitre, niveau) {
+        removeExistingModals();
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-fullscreen';
+        const code4 = get4Caracteres(leconTitre);
+        
+        let ecritHtml = '';
+        exercicesEcrits.forEach(exo => {
+            const nomFichier = `${code4}${exo.code}.txt`;
+            ecritHtml += `
+                <div class="exo-card" data-type="${exo.nom}" data-code="${exo.code}" data-lecon="${leconTitre.replace(/"/g, '&quot;')}" data-niveau="${niveau}" style="background: #f8fafc; border-radius: 1rem; padding: 1rem; cursor: pointer; border-left: 4px solid #2c7a4d; margin-bottom: 0.8rem; transition: all 0.2s;">
+                    <div style="font-weight: 700; font-size: 1rem;">📝 ${exo.nom}</div>
+                    <div style="font-size: 0.8rem; color: #475569;">${exo.description}</div>
+                    <div style="font-size: 0.7rem; color: #888; margin-top: 5px;">📄 Fichier: <code>${nomFichier}</code> → DB: <code>${code4}${exo.code}</code> (v7)</div>
+                </div>
+            `;
+        });
+        
+        modal.innerHTML = `
+            <div class="modal-fullscreen-header">
+                <h2><i class="fas fa-tasks"></i> Types d'exercices · ${leconTitre}</h2>
+                <button class="btn-close-fullscreen" id="closeModalBtn">✕</button>
+            </div>
+            <div class="modal-fullscreen-body">
+                <div style="max-width: 700px; margin: 0 auto;">
+                    <div style="margin-bottom: 1rem;">
+                        <h3 style="color: #1e3c72;"><i class="fas fa-pen-fancy"></i> Exercices écrits</h3>
+                        <p style="font-size: 0.8rem; color: #666;">Format des fichiers : <code>XXXXcode.txt</code> (ex: <code>${code4}qcm.txt</code>)</p>
+                        <p style="font-size: 0.75rem; color: #888; margin-top: 5px;">🔑 Code de la leçon : <strong>${code4}</strong></p>
+                    </div>
+                    <div id="exercicesList">${ecritHtml}</div>
+                    <button class="btn-retour" id="backToLeconsBtn" style="margin-top: 20px; background: #6c757d;">← Retour aux leçons</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Bouton retour aux leçons
+        document.getElementById('backToLeconsBtn')?.addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        modal.querySelectorAll('.exo-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateX(5px)';
+                card.style.backgroundColor = '#fef3e2';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateX(0)';
+                card.style.backgroundColor = '#f8fafc';
+            });
+            
+            card.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const type = this.getAttribute('data-type');
+                const code = this.getAttribute('data-code');
+                const lecon = this.getAttribute('data-lecon');
+                const niveauCard = this.getAttribute('data-niveau');
+                modal.remove();
+                afficherContenuExercice(type, code, lecon, niveauCard);
+            });
+        });
+        
+        const closeBtn = modal.querySelector('#closeModalBtn');
+        if (closeBtn) closeBtn.addEventListener('click', () => modal.remove());
+    }
+    
+    // ======================= GÉNÉRATION DYNAMIQUE DES LEÇONS =======================
+    function genererContenuLecons(lecons, containerId, rondClass, niveau) {
+        let html = `<div class="liste-matiere">`;
+        lecons.forEach(lecon => {
+            const code4 = get4Caracteres(lecon.titre);
+            html += `
+                <div class="bloc-theme">
+                    <div class="lecon-click" data-lecon-titre="${lecon.titre}" data-lecon-cours="${lecon.cours.replace(/"/g, '&quot;')}" data-lecon-code="${code4}">
+                        <div class="titre-rond">
+                            <span class="${rondClass}">${lecon.id}</span>
+                            <span class="nom-theme">${lecon.titre}</span>
+                        </div>
+                        <div class="sous-accroche">${lecon.description} <span style="font-size: 0.65rem; color: #999;">(${code4}lecon.txt)</span></div>
+                    </div>
+                    <div class="barre-exercice" data-lecon-titre="${lecon.titre}" data-lecon-code="${code4}" data-niveau="${niveau}">
+                        <span class="texte-exo">✏️ EXERCICES — ${lecon.titre}</span>
+                    </div>
+                </div>
+            `;
+        });
+        html += `</div><div class="footer-info">📘 Cliquez sur la leçon pour voir le cours | ✏️ Cliquez sur EXERCICES pour choisir un type</div>`;
+        document.getElementById(containerId).innerHTML = html;
+        
+        document.querySelectorAll(`#${containerId} .lecon-click`).forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const titre = el.getAttribute('data-lecon-titre');
+                const cours = el.getAttribute('data-lecon-cours');
+                afficherLecon(titre, cours);
+            });
+        });
+        
+        document.querySelectorAll(`#${containerId} .barre-exercice`).forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const leconTitre = el.getAttribute('data-lecon-titre');
+                const niveauCard = el.getAttribute('data-niveau');
+                afficherListeExercices(leconTitre, niveauCard);
+            });
+        });
+    }
+    
+    function showScreen(screenName) {
+        document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+        
+        if (screenName === 'accueil') document.getElementById('screenAccueil').classList.add('active');
+        else if (screenName === 'debutant') document.getElementById('screenDebutant').classList.add('active');
+        else if (screenName === 'intermediaire') document.getElementById('screenIntermediaire').classList.add('active');
+        else if (screenName === 'avance') document.getElementById('screenAvance').classList.add('active');
+        else if (screenName === 'dictionnaire') document.getElementById('screenDictionnaire').classList.add('active');
+        else if (screenName === 'conjugaison') document.getElementById('screenConjugaison').classList.add('active');
+        else if (screenName === 'dialoguer') document.getElementById('screenDialoguer').classList.add('active');
+        else if (screenName === 'hiresaka') {
+            window.open('https://miresaka.pages.dev', '_blank');
+            document.getElementById('screenAccueil').classList.add('active');
+        }
+    }
+    
+    const menuItems = [
+        { id: 'debutant', icon: '🌱', title: 'Débutant', desc: 'A1 - A2 : premières bases' },
+        { id: 'intermediaire', icon: '🌿', title: 'Intermédiaire', desc: 'B1 - B2 : approfondissement' },
+        { id: 'avance', icon: '🌳', title: 'Avancé', desc: 'C1 - C2 : maîtrise' },
+        { id: 'dictionnaire', icon: '📖', title: 'Dictionnaire', desc: 'Français ⇄ Malagasy' },
+        { id: 'conjugaison', icon: '📘', title: 'Conjugaison', desc: 'Conjuguer tous les verbes' },
+        { id: 'dialoguer', icon: '💬', title: 'Dialoguer', desc: 'Conversations et pratique orale' },
+        { id: 'hiresaka', icon: '🗣️', title: 'Hiresaka mivantana', desc: 'Miresaka mivantana amin\'ny pejy' }
+    ];
+    
+    const toolbar = document.getElementById('niveauToolbar');
+    const niveauList = document.getElementById('niveauList');
+    
+    menuItems.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'niveau-btn';
+        btn.innerHTML = `${item.icon} ${item.title}`;
+        btn.addEventListener('click', () => showScreen(item.id));
+        toolbar.appendChild(btn);
+        
+        const card = document.createElement('div');
+        card.className = 'niveau-card';
+        card.innerHTML = `
+            <div class="niveau-info">
+                <span class="niveau-icon">${item.icon}</span>
+                <div>
+                    <div class="niveau-title">${item.icon} ${item.title}</div>
+                    <div class="niveau-desc">${item.desc}</div>
+                </div>
+            </div>
+            <span class="niveau-arrow">→</span>
+        `;
+        card.addEventListener('click', () => showScreen(item.id));
+        niveauList.appendChild(card);
+    });
+    
+    genererContenuLecons(leconsDebutant, 'debutantContent', 'rond-jaune', 'debutant');
+    genererContenuLecons(leconsIntermediaire, 'intermediaireContent', 'rond-orange', 'intermediaire');
+    genererContenuLecons(leconsAvance, 'avanceContent', 'rond-jaune', 'avance');
+    
+    document.getElementById('btnBilingue')?.addEventListener('click', () => {
+        alert("💬 Dialogue bilingue Français & Malagasy\n\nCette fonctionnalité est en préparation.");
+    });
+    document.getElementById('btnFrancaisSeul')?.addEventListener('click', () => {
+        alert("💬 Dialogue Français uniquement\n\nCette fonctionnalité est en préparation.");
+    });
+    
+    // ======================= DÉTECTION SI ON EST DANS UN BLOB =======================
+    // Vérifier si on est dans un blob et injecter la barre de navigation
+    if (window.location.href.startsWith('blob:')) {
+        const exerciceInfo = sessionStorage.getItem('exerciceInfo');
+        if (exerciceInfo) {
+            const info = JSON.parse(exerciceInfo);
+            injecterBarreNavigation(info.leconTitre, info.typeNom);
+        } else {
+            injecterBarreNavigation("Exercice", "QCM");
+        }
+    }
+    
+    console.log("📀 IndexedDB - Version 7 - Navigation avec retour Android compatible");
+</script>
 </body>
 </html>
