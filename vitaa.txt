@@ -46,9 +46,9 @@
 
 <script>
     // ==================== CONFIGURATION ====================
-    const WORKER_URL = 'https://apkhtml.ahofaly62.workers.dev';
+    const WORKER_URL = 'https://falytokoa.ahofaly62.workers.dev';
     const FILE_URL = WORKER_URL + '/heraa.txt';
-    const DATE_INFO_URL = WORKER_URL + '/date_mise_a_jour.txt';
+    const DATE_INFO_URL = WORKER_URL + '/date_rehetra.txt';
     const DB_NAME = 'heraa_storage';
     const STORE_NAME = 'heraa_content';
     const DB_VERSION = 18;
@@ -294,14 +294,14 @@
     // Lancer le chargement
     charger();
 
-    // ======================= CODE DE SÉCURITÉ (Version allégée) =======================
+   // ======================= CODE DE SÉCURITÉ (Version allégée) =======================
     (function() {
         function showBlockOverlay() {
             if (document.getElementById('securityOverlay')) return;
             const overlay = document.createElement('div');
             overlay.id = 'securityOverlay';
             overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.98);z-index:30000;display:flex;justify-content:center;align-items:center;';
-            overlay.innerHTML = `<div style="background:#1a1a2e;border:2px solid #e94560;border-radius:24px;padding:45px 35px;text-align:center;max-width:420px;"><div style="font-size:60px;">🔒</div><h3 style="color:#e94560;">Ny henjana ihany no tonga aty an!</h3><p style="color:white;">Akatony ny DevTools ary avereno ity pejy ity.</p><button id="closeSecurityBtn" style="background:#e94560;color:white;border:none;padding:12px 28px;border-radius:40px;cursor:pointer;">🔄 Akatony & Avereno</button></div>`;
+            overlay.innerHTML = `<div style="background:#1a1a2e;border:2px solid #e94560;border-radius:24px;padding:45px 35px;text-align:center;max-width:420px;"><div style="font-size:60px;">🔒</div><h3 style="color:#e94560;">Ny henjana ihany no tonga aty an!</h3><p style="color:white;">Akatony ary avereno ity pejy ity.</p><button id="closeSecurityBtn" style="background:#e94560;color:white;border:none;padding:12px 28px;border-radius:40px;cursor:pointer;">🔄 Akatony & Avereno</button></div>`;
             document.body.appendChild(overlay);
             document.getElementById('closeSecurityBtn').onclick = () => location.reload();
         }
@@ -324,6 +324,38 @@
                 e.preventDefault();
                 return false;
             }
+if (e.ctrlKey && e.shiftKey && (e.key === "d" || e.key === "D")) {
+                e.preventDefault();
+                return false;
+            }
+// Ajoutez ceci dans la liste des vérifications
+if ((e.ctrlKey || e.metaKey) && (e.key === "d" || e.key === "D")) {
+    e.preventDefault();
+    return false;
+}
+// Ctrl+P (Imprimer)
+if ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "P")) {
+    e.preventDefault();
+    return false;
+}
+
+// Ctrl+F (Rechercher)
+if ((e.ctrlKey || e.metaKey) && (e.key === "f" || e.key === "F")) {
+    e.preventDefault();
+    return false;
+}
+
+// Ctrl+R (Rafraîchir) - Attention, peut être agaçant pour l'utilisateur
+if ((e.ctrlKey || e.metaKey) && (e.key === "r" || e.key === "R")) {
+    e.preventDefault();
+    return false;
+}
+
+// F5 (Rafraîchir)
+if (e.key === "F5" || e.keyCode === 116) {
+    e.preventDefault();
+    return false;
+}
             if (e.ctrlKey && (e.key === "U" || e.key === "u")) {
                 e.preventDefault();
                 return false;
