@@ -136,8 +136,8 @@
     
     <script>
         // ==================== CONFIGURATION ====================
-        const FILE_URL = 'https://falytokoa.ahofaly62.workers.dev/vitaa.txt';
-        const DATE_INFO_URL = 'https://apkhtml.ahofaly62.workers.dev/date_rehetra.txt';
+        const FILE_URL = 'https://falytokoa.ahofaly62.workers.dev/heraa.txt';
+        const DATE_INFO_URL = 'https://falytokoa.ahofaly62.workers.dev/date_rehetra.txt';
         const TARGET_FILE = 'via.txt';
         const DB_NAME = 'fran_ok_cache';
         const STORE_NAME = 'fran_ok_contenus';
