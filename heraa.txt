@@ -1,831 +1,663 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
+<html lang="fr"><head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>hita - Quiz Sécurisé</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>QCM : Possessifs &amp; Démonstratifs - 60 questions</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
+            user-select: none; /* empêche la sélection de texte */
             -webkit-tap-highlight-color: transparent;
         }
-        
+
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #0f2b36, #1a4a5f, #2c3e50);
             min-height: 100vh;
+            padding: 25px 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
+            font-family: system-ui, 'Segoe UI', 'Roboto', sans-serif;
         }
-        
-        .container {
-            text-align: center;
-            max-width: 600px;
+
+        /* Carte principale */
+        .quiz-container {
+            max-width: 1050px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 2rem;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+        }
+
+        /* En-tête avec téléchargement */
+        .quiz-header {
+            background: #0f2c3d;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .quiz-header h1 {
+            color: #ffdd99;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-btn {
+            background: #ffb347;
+            border: none;
+            padding: 8px 22px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            color: #1e2f3a;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .download-btn:hover {
+            background: #ff9f1a;
+            transform: scale(0.96);
+        }
+
+        /* Barre de progression */
+        .progress-bar {
+            background: #eef2f7;
+            padding: 12px 28px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #cbdae9;
+            font-weight: 600;
+        }
+
+        .badge {
+            background: #1d4e6e;
+            color: white;
+            padding: 5px 18px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+        }
+
+        .score-badge {
+            background: #2b7a4b;
+        }
+
+        /* Zone question */
+        .question-area {
+            padding: 2rem 2rem 1rem 2rem;
+        }
+
+        .question-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .question-text {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: #0a2f44;
+            line-height: 1.4;
+            border-left: 6px solid #ffb347;
+            padding-left: 22px;
+            flex: 1;
+        }
+
+        /* Bouton traduction malagasy */
+        .mg-translate-btn {
+            background: #2c7a47;
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 60px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .mg-translate-btn:hover {
+            background: #1f5e38;
+            transform: scale(0.96);
+        }
+
+        .translation-popup {
+            background: #f0e6c5;
+            color: #2d4a22;
+            padding: 6px 12px;
+            border-radius: 24px;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid #ffb347;
+            display: inline-block;
             width: 100%;
         }
-        
-        h1 {
-            font-size: 80px;
-            color: #e94560;
-            text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
-            animation: pulse 2s infinite;
-            margin-bottom: 30px;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        
-        .quiz-container {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .question {
-            margin-bottom: 30px;
-            text-align: left;
-        }
-        
-        .question-text {
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        
-        .options {
+
+        /* Grille options */
+        .options-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 14px;
+            margin-bottom: 0.5rem;
         }
-        
-        .option {
+
+        .option-card {
+            background: #f8fafc;
+            border-radius: 80px;
+            padding: 12px 22px;
             display: flex;
             align-items: center;
-            padding: 12px 15px;
-            background: rgba(15, 52, 96, 0.8);
-            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(233, 69, 96, 0.3);
+            transition: all 0.2s ease;
+            border: 1px solid #e2edf7;
         }
-        
-        .option:hover {
-            background: rgba(233, 69, 96, 0.3);
-            transform: translateX(5px);
+
+        .option-card:hover {
+            background: #eef4ff;
+            transform: translateX(6px);
+            border-color: #ffb347;
         }
-        
-        .option.selected {
-            background: #e94560;
-            border-color: #fff;
+
+        .option-letter {
+            width: 36px;
+            height: 36px;
+            background: #cbdde9;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-right: 18px;
+            color: #1e2f3f;
         }
-        
-        .option input {
-            margin-right: 12px;
-            cursor: pointer;
-            width: 18px;
-            height: 18px;
-            pointer-events: none;
+
+        .option-card.selected {
+            background: #ffefd6;
+            border: 2px solid #ffb347;
         }
-        
-        .option label {
+
+        .option-card.selected .option-letter {
+            background: #ffb347;
             color: white;
-            cursor: pointer;
-            flex: 1;
-            font-size: 14px;
-            pointer-events: none;
         }
-        
-        button {
-            background: #e94560;
+
+        .option-text {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #1a3e50;
+        }
+
+        /* Zone message motivation (palier) */
+        .motivation-banner {
+            background: #f9eec1;
+            margin: 10px 2rem 0 2rem;
+            padding: 10px 18px;
+            border-radius: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: #b45f1b;
+            font-size: 0.95rem;
+            transition: 0.2s;
+        }
+
+        /* Rapport final */
+        .final-report {
+            background: #eef3fc;
+            margin: 1rem 2rem 2rem 2rem;
+            border-radius: 28px;
+            padding: 1.5rem;
+            text-align: left;
+        }
+
+        .final-header {
+            font-size: 1.6rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .final-score {
+            background: #1d4e6e;
             color: white;
+            display: inline-block;
+            padding: 8px 25px;
+            border-radius: 60px;
+            font-size: 1.3rem;
+        }
+
+        .questions-list {
+            max-height: 550px;
+            overflow-y: auto;
+            margin-top: 20px;
+            padding-right: 8px;
+        }
+
+        .question-summary {
+            background: white;
+            border-radius: 20px;
+            padding: 12px 18px;
+            margin-bottom: 12px;
+            border-left: 5px solid;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .question-summary.correct {
+            border-left-color: #2b7a4b;
+        }
+
+        .question-summary.wrong {
+            border-left-color: #c0392b;
+        }
+
+        .restart-btn {
+            background: #ffb347;
             border: none;
-            padding: 14px 30px;
-            border-radius: 10px;
-            font-size: 16px;
+            padding: 12px 25px;
+            border-radius: 60px;
             font-weight: bold;
+            font-size: 1rem;
             cursor: pointer;
             margin-top: 20px;
-            transition: all 0.3s ease;
-            width: 100%;
+            display: block;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            color: #2c3e50;
+            transition: 0.2s;
         }
-        
-        button:hover {
-            background: #ff6b6b;
-            transform: translateY(-2px);
+        .restart-btn:hover {
+            background: #ffa01e;
+            transform: scale(0.97);
         }
-        
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
-            font-weight: bold;
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 1rem;
+            color: #6b8ba0;
+        }
+        .hidden {
             display: none;
         }
-        
-        .result.success {
-            background: #1a5f4b;
-            color: #d4ffd4;
-            display: block;
-        }
-        
-        .result.error {
-            background: #5f1a1a;
-            color: #ffcccc;
-            display: block;
-        }
-        
-        .score {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.8);
-            color: #e94560;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 12px;
-            z-index: 10000;
-            animation: fadeOut 2s ease forwards;
-            pointer-events: none;
-        }
-        
-        @keyframes fadeOut {
-            0% { opacity: 1; transform: translateY(0); }
-            70% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-20px); display: none; }
-        }
-        
-        .footer {
-            margin-top: 20px;
-            color: #666;
-            font-size: 11px;
-            font-family: monospace;
-        }
-        
-        /* Bouton de sauvegarde */
-        .save-btn {
-            background: #4CAF50;
-            margin-top: 10px;
-        }
-        
-        .save-btn:hover {
-            background: #45a049;
-        }
-        
-        /* Overlay de confirmation pour empêcher le refresh */
-        .refresh-warning {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 20000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: monospace;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .refresh-warning .message-box {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 2px solid #e94560;
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            max-width: 400px;
-            margin: 20px;
-        }
-        
-        .refresh-warning .message-box h3 {
-            color: #e94560;
-            font-size: 24px;
-            margin-bottom: 15px;
-        }
-        
-        .refresh-warning .message-box p {
-            color: white;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-        
-        .refresh-warning .message-box button {
-            width: auto;
-            padding: 10px 30px;
-            margin-top: 10px;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        /* Anti-screenshot */
-        .anti-screenshot {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: transparent;
-            pointer-events: none;
-            z-index: 99999;
+        @media (max-width: 620px) {
+            .question-text { font-size: 1.2rem; }
+            .option-text { font-size: 0.85rem; }
+            .mg-translate-btn { font-size: 0.7rem; padding: 5px 12px; }
         }
     </style>
 </head>
 <body>
-    <div class="anti-screenshot"></div>
-    <div class="container">
-        <h1>hita</h1>
-        
-        <div class="quiz-container">
-            <div class="question">
-                <div class="question-text">🎬 Question 1 : Qui a réalisé le film "Inception" ?</div>
-                <div class="options" data-question="1">
-                    <div class="option" data-value="0">
-                        <input type="radio" name="q1" value="0">
-                        <label>James Cameron</label>
-                    </div>
-                    <div class="option" data-value="1">
-                        <input type="radio" name="q1" value="1">
-                        <label>Christopher Nolan</label>
-                    </div>
-                    <div class="option" data-value="2">
-                        <input type="radio" name="q1" value="2">
-                        <label>Quentin Tarantino</label>
-                    </div>
-                    <div class="option" data-value="3">
-                        <input type="radio" name="q1" value="3">
-                        <label>Steven Spielberg</label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="question">
-                <div class="question-text">🎵 Question 2 : Quel chanteur interprète "Bohemian Rhapsody" ?</div>
-                <div class="options" data-question="2">
-                    <div class="option" data-value="0">
-                        <input type="radio" name="q2" value="0">
-                        <label>David Bowie</label>
-                    </div>
-                    <div class="option" data-value="1">
-                        <input type="radio" name="q2" value="1">
-                        <label>Mick Jagger</label>
-                    </div>
-                    <div class="option" data-value="2">
-                        <input type="radio" name="q2" value="2">
-                        <label>Freddie Mercury</label>
-                    </div>
-                    <div class="option" data-value="3">
-                        <input type="radio" name="q2" value="3">
-                        <label>Elton John</label>
-                    </div>
-                </div>
-            </div>
-            
-            <button onclick="verifierReponses()">✅ Vérifier mes réponses</button>
-            <button onclick="sauvegarderProgres()" class="save-btn">💾 Sauvegarder ma progression</button>
-            <button onclick="chargerProgres()" class="save-btn" style="background:#2196F3;">📂 Charger progression sauvegardée</button>
-            <div id="result" class="result"></div>
-        </div>
-        <div class="footer">🔒 Quiz sécurisé - Rafraîchissement désactivé - Sauvegarde automatique</div>
+<div class="quiz-container" id="quizRoot">
+    <div class="quiz-header">
+        <h1>📚 Possessifs &amp; Démonstratifs • 60 QCM</h1>
+        <button class="download-btn" id="downloadFileBtn">⬇️ Télécharger ce fichier</button>
     </div>
+    <div class="progress-bar">
+        <span class="badge" id="qCounter">Question 21 / 60</span>
+        <span class="badge score-badge" id="liveScore">🎯 Score : 5 / 60</span>
+    </div>
+    <div class="question-area" id="questionBlock">
+            <div class="question-header">
+                <div class="question-text">21. _____ fleurs sont fanées. (démonstratif pluriel)</div>
+                <button class="mg-translate-btn" id="mgTranslateBtn">🇲🇬 MG</button>
+            </div>
+            <div class="options-list" id="optionsContainer">
+                
+                <div class="option-card " data-opt-letter="A">
+                    <div class="option-letter">A</div>
+                    <span class="option-text">Ce</span>
+                </div>
+            
+                <div class="option-card " data-opt-letter="B">
+                    <div class="option-letter">B</div>
+                    <span class="option-text">Cet</span>
+                </div>
+            
+                <div class="option-card " data-opt-letter="C">
+                    <div class="option-letter">C</div>
+                    <span class="option-text">Cette</span>
+                </div>
+            
+                <div class="option-card " data-opt-letter="D">
+                    <div class="option-letter">D</div>
+                    <span class="option-text">Ces</span>
+                </div>
+            
+            </div>
+        </div>
+    <div id="motivationMessage" class="motivation-banner" style="display: none;">💪 Du courage ! Vous avez moins de 15 bonnes réponses pour l'instant, mais chaque erreur est une leçon. Révisez les possessifs et démonstratifs, vous allez progresser ! 📚</div>
+    <div id="finalReportContainer"></div>
+    <footer>✅ Cliquez sur une réponse → passage automatique. À la fin, note + corrigé complet. 🇲🇬 Bouton MG pour traduction.</footer>
+</div>
 
-    <script>
-        // ============================================
-        // DÉTECTION DES OUTILS DE DÉVELOPPEMENT
-        // ============================================
-        
-        // Détection de la console ouverte
-        function detectDevTools() {
-            const startTime = performance.now();
-            debugger;
-            const endTime = performance.now();
-            if (endTime - startTime > 100) {
-                showNotification('🔒 Console développeur détectée et bloquée');
-                return true;
-            }
-            return false;
+<script>
+    // --- EMPÊCHER CLIC DROIT ET COPIE ---
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('copy', (e) => e.preventDefault());
+    document.addEventListener('cut', (e) => e.preventDefault());
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey && (e.key === 'c' || e.key === 'C' || e.key === 'x' || e.key === 'X')) || 
+            (e.metaKey && (e.key === 'c' || e.key === 'C'))) {
+            e.preventDefault();
         }
-        
-        // Vérification périodique
-        setInterval(() => {
-            detectDevTools();
-        }, 1000);
-        
-        // ============================================
-        // RÉPONSES CORRECTES
-        // ============================================
-        const REPONSES = {
-            q1: 1,  // Christopher Nolan (index 1)
-            q2: 2   // Freddie Mercury (index 2)
-        };
-        
-        // ============================================
-        // SAUVEGARDE AVEC INDEXEDDB
-        // ============================================
-        
-        let db = null;
-        const DB_NAME = "QuizDB_Secure";
-        const STORE_NAME = "progress_secure";
-        
-        // Ouvrir la base de données
-        function ouvrirDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, 1);
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
-                    resolve(db);
-                };
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-                    }
-                };
-            });
+    });
+
+    // ------------------------- BANQUE DE QUESTIONS AVEC TRADUCTION MALAGASY -------------------------
+    const bank = [
+        { q: "Complétez : ____ livre est sur la table. (appartient à moi)", options: ["Mon", "Ton", "Son", "Notre"], correct: "A", explanation: "« mon » = adjectif possessif 1ʳᵉ personne du singulier, masculin singulier (livre).", mg: "Fenoy : ____ boky eo ambony latabatra. (an'alahy)" },
+        { q: "_____ sac à dos est trop lourd. (à toi)", options: ["Mon", "Ma", "Ton", "Ta"], correct: "C", explanation: "« ton » car 'sac' est masculin singulier et 2ᵉ personne.", mg: "_____ kitapo mavesatra loatra. (ananao)" },
+        { q: "Ce n'est pas mon stylo, c'est _____. (pronom possessif, à toi)", options: ["le mien", "le tien", "le sien", "le nôtre"], correct: "B", explanation: "« le tien » remplace 'ton stylo' (pronom possessif 2ᵉ personne).", mg: "Tsy ny peninao io fa _____. (ananao)" },
+        { q: "_____ idée est géniale ! (à nous)", options: ["Notre", "Nos", "Notres", "Le nôtre"], correct: "A", explanation: "Notre : adjectif possessif pour un singulier (idée féminin).", mg: "_____ hevitra tena tsara ! (anantsika)" },
+        { q: "J'aime beaucoup _____ chaussures. (à toi, pluriel)", options: ["tes", "mes", "ses", "nos"], correct: "A", explanation: "« tes » : adjectif possessif 2ᵉ personne, féminin pluriel.", mg: "Tiako dia tiako _____ kiraro. (ananao)" },
+        { q: "Regarde _____ arbre magnifique ! (démonstratif)", options: ["ce", "cet", "cette", "ces"], correct: "A", explanation: "« ce » devant un nom masculin singulier commençant par consonne (arbre).", mg: "Jereo _____ hazo tsara tarehy !" },
+        { q: "_____ enfant est très sage. (démonstratif, voyelle ou h muet)", options: ["Ce", "Cet", "Cette", "Ces"], correct: "B", explanation: "« cet » s'emploie devant masculin singulier débutant par voyelle ou h muet (enfant).", mg: "_____ zaza tsara fanahy tokoa." },
+        { q: "_____ fleurs sont fanées. (démonstratif pluriel)", options: ["Ce", "Cet", "Cette", "Ces"], correct: "D", explanation: "« ces » pour tous les pluriels, quel que soit le genre.", mg: "_____ voninkazo dia malazo." },
+        { q: "Le mien est bleu, mais _____ est rouge. (le sien)", options: ["le mien", "le tien", "le sien", "le vôtre"], correct: "C", explanation: "« le sien » : pronom possessif 3ᵉ personne (à lui/elle).", mg: "Ny ahy dia manga, fa _____ kosa mena." },
+        { q: "Nous avons nos places, ils ont _____. (les leurs)", options: ["les nôtres", "les vôtres", "les leurs", "les siens"], correct: "C", explanation: "« les leurs » : pronom possessif 3ᵉ personne pluriel.", mg: "Manana ny toeranay izahay, fa izy kosa manana _____." }
+    ];
+    // Étendre la banque pour avoir assez de questions (on ajoute des variantes)
+    const extra = [
+        { q: "_____ ordinateur est neuf ? (démonstratif voyelle)", options: ["Ce", "Cet", "Cette", "Ces"], correct: "B", explanation: "« cet ordinateur » voyelle.", mg: "_____ ordinatera vaovao ?" },
+        { q: "J’ai fini mon exercice, as-tu fini _____ ?", options: ["le mien", "le tien", "le sien", "le vôtre"], correct: "B", explanation: "Le tien = ton exercice.", mg: "Vitako ny fanazaran-tenako, efa vitanao _____ ?" },
+        { q: "_____ livres sont intéressants.", options: ["Ce", "Cet", "Cette", "Ces"], correct: "D", explanation: "ces livres.", mg: "_____ boky mahaliana." },
+        { q: "Il a cassé _____ portable.", options: ["mon", "ton", "son", "notre"], correct: "C", explanation: "son portable.", mg: "Nopotehiny _____ finday." },
+        { q: "_____ maison est spacieuse.", options: ["Ma", "Ta", "Sa", "Notre"], correct: "C", explanation: "sa maison.", mg: "_____ trano malalaka." },
+        { q: "J’ai oublié _____ clés.", options: ["mes", "tes", "ses", "nos"], correct: "A", explanation: "mes clés.", mg: "Hadinoiko _____ lakile." },
+        { q: "_____ idées sont brillantes (à vous poli)", options: ["Nos", "Vos", "Leurs", "Mes"], correct: "B", explanation: "vos idées.", mg: "_____ hevitra dia mamiratra." },
+        { q: "Préfères-tu ____ gâteau ou ____ ?", options: ["ce / le mien", "cet / le tien", "cette / le sien", "ces / notre"], correct: "A", explanation: "ce gâteau / le mien.", mg: "Aleonao ve ____ mofony na ____ ?" }
+    ];
+    const fullBank = [...bank, ...extra, ...bank.slice(0, 50)]; // on s'assure d'avoir assez d'éléments
+    // Fonction pour obtenir 60 questions aléatoires uniques
+    function getRandomQuestions(n) {
+        const shuffled = [...fullBank];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
-        
-        // Sauvegarder la progression
-        async function sauvegarderProgres() {
-            try {
-                const q1Selected = document.querySelector('input[name="q1"]:checked');
-                const q2Selected = document.querySelector('input[name="q2"]:checked');
-                
-                const progression = {
-                    id: "quiz_hita_secure",
-                    q1: q1Selected ? q1Selected.value : null,
-                    q2: q2Selected ? q2Selected.value : null,
-                    date: new Date().toISOString(),
-                    timestamp: Date.now()
-                };
-                
-                await ouvrirDB();
-                const tx = db.transaction(STORE_NAME, 'readwrite');
-                const store = tx.objectStore(STORE_NAME);
-                await store.put(progression);
-                await tx.done;
-                
-                showNotification('✅ Progression sauvegardée !');
-                return true;
-            } catch (error) {
-                console.error("Erreur sauvegarde:", error);
-                showNotification('❌ Erreur lors de la sauvegarde');
-                return false;
-            }
-        }
-        
-        // Charger la progression
-        async function chargerProgres() {
-            try {
-                await ouvrirDB();
-                const tx = db.transaction(STORE_NAME, 'readonly');
-                const store = tx.objectStore(STORE_NAME);
-                const progression = await new Promise((resolve) => {
-                    const request = store.get("quiz_hita_secure");
-                    request.onsuccess = () => resolve(request.result);
-                });
-                
-                if (progression) {
-                    if (progression.q1 !== null) {
-                        const q1Radio = document.querySelector(`input[name="q1"][value="${progression.q1}"]`);
-                        if (q1Radio) {
-                            q1Radio.checked = true;
-                            const q1Option = q1Radio.closest('.option');
-                            if (q1Option) {
-                                const parentOptions = q1Option.closest('.options');
-                                parentOptions.querySelectorAll('.option').forEach(opt => {
-                                    opt.classList.remove('selected');
-                                });
-                                q1Option.classList.add('selected');
-                            }
-                        }
-                    }
-                    
-                    if (progression.q2 !== null) {
-                        const q2Radio = document.querySelector(`input[name="q2"][value="${progression.q2}"]`);
-                        if (q2Radio) {
-                            q2Radio.checked = true;
-                            const q2Option = q2Radio.closest('.option');
-                            if (q2Option) {
-                                const parentOptions = q2Option.closest('.options');
-                                parentOptions.querySelectorAll('.option').forEach(opt => {
-                                    opt.classList.remove('selected');
-                                });
-                                q2Option.classList.add('selected');
-                            }
-                        }
-                    }
-                    
-                    showNotification(`📀 Progression chargée (${new Date(progression.date).toLocaleDateString()})`);
-                } else {
-                    showNotification('📭 Aucune progression sauvegardée');
-                }
-                
-            } catch (error) {
-                console.error("Erreur chargement:", error);
-                showNotification('❌ Erreur lors du chargement');
-            }
-        }
-        
-        // Charger automatiquement au démarrage
-        async function autoCharger() {
-            try {
-                await ouvrirDB();
-                const tx = db.transaction(STORE_NAME, 'readonly');
-                const store = tx.objectStore(STORE_NAME);
-                const progression = await new Promise((resolve) => {
-                    const request = store.get("quiz_hita_secure");
-                    request.onsuccess = () => resolve(request.result);
-                });
-                
-                if (progression) {
-                    if (progression.q1 !== null) {
-                        const q1Radio = document.querySelector(`input[name="q1"][value="${progression.q1}"]`);
-                        if (q1Radio) {
-                            q1Radio.checked = true;
-                            const q1Option = q1Radio.closest('.option');
-                            if (q1Option) {
-                                const parentOptions = q1Option.closest('.options');
-                                parentOptions.querySelectorAll('.option').forEach(opt => {
-                                    opt.classList.remove('selected');
-                                });
-                                q1Option.classList.add('selected');
-                            }
-                        }
-                    }
-                    
-                    if (progression.q2 !== null) {
-                        const q2Radio = document.querySelector(`input[name="q2"][value="${progression.q2}"]`);
-                        if (q2Radio) {
-                            q2Radio.checked = true;
-                            const q2Option = q2Radio.closest('.option');
-                            if (q2Option) {
-                                const parentOptions = q2Option.closest('.options');
-                                parentOptions.querySelectorAll('.option').forEach(opt => {
-                                    opt.classList.remove('selected');
-                                });
-                                q2Option.classList.add('selected');
-                            }
-                        }
-                    }
-                    
-                    console.log("Auto-chargement réussi");
-                }
-            } catch(e) {
-                console.log("Pas de sauvegarde existante");
-            }
-        }
-        
-        // ============================================
-        // GESTION DES OPTIONS
-        // ============================================
-        document.querySelectorAll('.option').forEach(option => {
-            option.addEventListener('click', function(e) {
-                const radio = this.querySelector('input[type="radio"]');
-                if (radio) {
-                    radio.checked = true;
-                    
-                    const parentOptions = this.closest('.options');
-                    parentOptions.querySelectorAll('.option').forEach(opt => {
-                        opt.classList.remove('selected');
-                    });
-                    
-                    this.classList.add('selected');
-                    sauvegarderProgres(); // Sauvegarde automatique à chaque sélection
-                }
-            });
-        });
-        
-        // ============================================
-        // VÉRIFICATION DES RÉPONSES
-        // ============================================
-        function verifierReponses() {
-            let score = 0;
-            
-            const q1Selected = document.querySelector('input[name="q1"]:checked');
-            if (q1Selected && parseInt(q1Selected.value) === REPONSES.q1) score++;
-            
-            const q2Selected = document.querySelector('input[name="q2"]:checked');
-            if (q2Selected && parseInt(q2Selected.value) === REPONSES.q2) score++;
-            
-            const resultDiv = document.getElementById('result');
-            const total = 2;
-            
-            if (score === total) {
-                resultDiv.className = 'result success';
-                resultDiv.innerHTML = `
-                    <div class="score">🎉 Félicitations ! 🎉</div>
-                    <div>Score : ${score}/${total}</div>
-                    <div>Bravo, tu es incollable sur la culture générale !</div>
-                `;
-                showNotification('🎉 Parfait ! Tu as tout bon !');
-            } else if (score === 1) {
-                resultDiv.className = 'result error';
-                resultDiv.innerHTML = `
-                    <div class="score">📝 Bonne réponse partielle</div>
-                    <div>Score : ${score}/${total}</div>
-                    <div>Encore un petit effort !</div>
-                `;
-                showNotification(`📝 Score: ${score}/${total}`);
+        while(shuffled.length < n) shuffled.push(...fullBank.slice(0, n - shuffled.length));
+        return shuffled.slice(0, n);
+    }
+    
+    const TOTAL = 60;
+    let questions = getRandomQuestions(TOTAL);
+    
+    // État
+    let currentIdx = 0;
+    let userSelections = new Array(TOTAL).fill(null);
+    let isLocked = new Array(TOTAL).fill(false);
+    let currentScore = 0;
+    let quizFinished = false;
+    let currentTranslationVisible = false;
+    let currentTranslationText = "";
+    
+    // DOM
+    const questionBlock = document.getElementById('questionBlock');
+    const finalContainer = document.getElementById('finalReportContainer');
+    const qCounterSpan = document.getElementById('qCounter');
+    const liveScoreSpan = document.getElementById('liveScore');
+    const downloadBtn = document.getElementById('downloadFileBtn');
+    const motivationDiv = document.getElementById('motivationMessage');
+    
+    function updateScoreUI() {
+        liveScoreSpan.innerText = `🎯 Score : ${currentScore} / ${TOTAL}`;
+    }
+    
+    // Afficher message de motivation/félicitations selon score au palier
+    function showPalierMotivation(questionNumber, currentScoreValue) {
+        // questionNumber = numéro de la question qui vient d'être répondue (1-index)
+        if (questionNumber === 20) {
+            if (currentScoreValue >= 15) {
+                motivationDiv.innerHTML = "🎉 FÉLICITATIONS ! Excellent début ! Vous avez déjà plus de 15 bonnes réponses sur 20. Continuez ainsi ! 🌟";
+                motivationDiv.style.display = "block";
             } else {
-                resultDiv.className = 'result error';
-                resultDiv.innerHTML = `
-                    <div class="score">❌ Aucune bonne réponse</div>
-                    <div>Score : ${score}/${total}</div>
-                    <div>Révise les réponses et réessaie !</div>
-                `;
-                showNotification(`❌ Score: ${score}/${total}`);
+                motivationDiv.innerHTML = "💪 Du courage ! Vous avez moins de 15 bonnes réponses pour l'instant, mais chaque erreur est une leçon. Révisez les possessifs et démonstratifs, vous allez progresser ! 📚";
+                motivationDiv.style.display = "block";
             }
+            setTimeout(() => { if(motivationDiv) motivationDiv.style.display = "none"; }, 4000);
+        } 
+        else if (questionNumber === 40) {
+            if (currentScoreValue >= 30) {
+                motivationDiv.innerHTML = "🏆 CHAPEAU ! Vous maîtrisez vraiment bien ! Plus de 30 bonnes réponses sur 40. Persévérez jusqu'à la fin ! 🎯";
+                motivationDiv.style.display = "block";
+            } else {
+                motivationDiv.innerHTML = "📖 Continuez vos efforts ! Vous avez moins de 30 bonnes réponses pour le moment. Relisez les règles des adjectifs possessifs et démonstratifs, vous allez y arriver ! 🌈";
+                motivationDiv.style.display = "block";
+            }
+            setTimeout(() => { if(motivationDiv) motivationDiv.style.display = "none"; }, 4500);
         }
+    }
+    
+    // Afficher la traduction malagasy de la question courante (toggle)
+    function toggleTranslation() {
+        const existingPopup = document.getElementById('dynamicTranslationPopup');
+        if (existingPopup) {
+            existingPopup.remove();
+            currentTranslationVisible = false;
+            return;
+        }
+        const qData = questions[currentIdx];
+        const mgText = qData.mg || "Tsy misy fandikana amin'izao (traduction non disponible)";
+        const popupDiv = document.createElement('div');
+        popupDiv.id = 'dynamicTranslationPopup';
+        popupDiv.className = 'translation-popup';
+        popupDiv.innerHTML = `🇲🇬 ${mgText}`;
+        const headerDiv = document.querySelector('.question-header');
+        if (headerDiv) headerDiv.insertAdjacentElement('afterend', popupDiv);
+        currentTranslationVisible = true;
+        // auto disparition au bout de 5 sec ou au prochain changement de question
+        setTimeout(() => {
+            const p = document.getElementById('dynamicTranslationPopup');
+            if(p) p.remove();
+            currentTranslationVisible = false;
+        }, 5000);
+    }
+    
+    // Nettoyer traduction si présente
+    function clearTranslation() {
+        const pop = document.getElementById('dynamicTranslationPopup');
+        if(pop) pop.remove();
+        currentTranslationVisible = false;
+    }
+    
+    // Rendu question courante
+    function renderCurrent() {
+        if (quizFinished) return;
+        clearTranslation();
+        const q = questions[currentIdx];
+        const alreadyAnswered = (userSelections[currentIdx] !== null);
+        const letters = ['A', 'B', 'C', 'D'];
         
-        // ============================================
-        // SÉCURITÉ RENFORCÉE
-        // ============================================
-        
-        let refreshAttempts = 0;
-        let blockOverlay = null;
-        
-        // Fonction pour afficher un avertissement
-        function showRefreshWarning() {
-            if (blockOverlay) return;
-            
-            refreshAttempts++;
-            
-            blockOverlay = document.createElement('div');
-            blockOverlay.className = 'refresh-warning';
-            blockOverlay.innerHTML = `
-                <div class="message-box">
-                    <h3>⚠️ Rafraîchissement bloqué ⚠️</h3>
-                    <p>Le rafraîchissement de la page est désactivé pour ce quiz.</p>
-                    <p>Votre progression est automatiquement sauvegardée.</p>
-                    <button onclick="this.closest('.refresh-warning').remove(); blockOverlay = null;">🔓 Continuer le quiz</button>
+        let optsHtml = '';
+        q.options.forEach((opt, idx) => {
+            const letter = letters[idx];
+            let selectedClass = (alreadyAnswered && userSelections[currentIdx] === letter) ? 'selected' : '';
+            optsHtml += `
+                <div class="option-card ${selectedClass}" data-opt-letter="${letter}">
+                    <div class="option-letter">${letter}</div>
+                    <span class="option-text">${opt}</span>
                 </div>
             `;
-            document.body.appendChild(blockOverlay);
-            
-            showNotification('🚫 Rafraîchissement de la page bloqué !');
-            
-            setTimeout(() => {
-                if (blockOverlay) {
-                    blockOverlay.remove();
-                    blockOverlay = null;
-                }
-            }, 5000);
-        }
-        
-        // Bloquer toutes les combinaisons de rafraîchissement
-        window.addEventListener('keydown', function(e) {
-            // F5, F5 avec modificateurs
-            if (e.key === "F5" || e.code === "F5" || (e.ctrlKey && e.key === "F5")) {
-                e.preventDefault();
-                e.stopPropagation();
-                showRefreshWarning();
-                return false;
-            }
-            
-            // Ctrl+R, Cmd+R
-            if ((e.ctrlKey || e.metaKey) && (e.key === "r" || e.key === "R")) {
-                e.preventDefault();
-                e.stopPropagation();
-                showRefreshWarning();
-                return false;
-            }
-            
-            // Ctrl+Shift+R
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "R" || e.key === "r")) {
-                e.preventDefault();
-                e.stopPropagation();
-                showRefreshWarning();
-                return false;
-            }
-            
-            // F12 - Outils développeur
-            if (e.key === "F12" || e.code === "F12") {
-                e.preventDefault();
-                e.stopPropagation();
-                showNotification('🔒 F12 désactivé');
-                return false;
-            }
-            
-            // Ctrl+Shift+I (Inspecteur)
-            if (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i")) {
-                e.preventDefault();
-                e.stopPropagation();
-                showNotification('🔒 Inspecteur désactivé');
-                return false;
-            }
-            
-            // Ctrl+Shift+J (Console)
-            if (e.ctrlKey && e.shiftKey && (e.key === "J" || e.key === "j")) {
-                e.preventDefault();
-                e.stopPropagation();
-                showNotification('🔒 Console désactivée');
-                return false;
-            }
-            
-            // Ctrl+Shift+C (Sélecteur)
-            if (e.ctrlKey && e.shiftKey && (e.key === "C" || e.key === "c")) {
-                e.preventDefault();
-                e.stopPropagation();
-                showNotification('🔒 Sélecteur désactivé');
-                return false;
-            }
-            
-            // Ctrl+U (Code source)
-            if (e.ctrlKey && (e.key === "U" || e.key === "u")) {
-                e.preventDefault();
-                e.stopPropagation();
-                showNotification('🔒 Code source masqué');
-                return false;
-            }
-            
-            // Ctrl+S (Sauvegarde page)
-            if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
-                e.preventDefault();
-                e.stopPropagation();
-                showNotification('💾 Sauvegarde de page désactivée');
-                return false;
-            }
-            
-            // Ctrl+P (Impression)
-            if ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "P")) {
-                e.preventDefault();
-                e.stopPropagation();
-                showNotification('🖨️ Impression désactivée');
-                return false;
-            }
         });
         
-        // Bloquer le clic droit
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
+        const html = `
+            <div class="question-header">
+                <div class="question-text">${currentIdx+1}. ${q.q}</div>
+                <button class="mg-translate-btn" id="mgTranslateBtn">🇲🇬 MG</button>
+            </div>
+            <div class="options-list" id="optionsContainer">
+                ${optsHtml}
+            </div>
+        `;
+        questionBlock.innerHTML = html;
+        
+        // Attacher événement traduction
+        const mgBtn = document.getElementById('mgTranslateBtn');
+        if (mgBtn) mgBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            showNotification('🔒 Clic droit désactivé');
-            return false;
+            toggleTranslation();
         });
         
-        // Bloquer la sélection de texte
-        document.addEventListener('selectstart', function(e) {
-            e.preventDefault();
-            return false;
-        });
-        
-        // Bloquer le drag & drop
-        document.addEventListener('dragstart', function(e) {
-            e.preventDefault();
-            return false;
-        });
-        
-        // Empêcher la copie
-        document.addEventListener('copy', function(e) {
-            e.preventDefault();
-            showNotification('📋 Copie désactivée');
-            return false;
-        });
-        
-        // Empêcher le cut
-        document.addEventListener('cut', function(e) {
-            e.preventDefault();
-            return false;
-        });
-        
-        // Empêcher le paste
-        document.addEventListener('paste', function(e) {
-            e.preventDefault();
-            showNotification('📌 Coller désactivé');
-            return false;
-        });
-        
-        // Sauvegarde avant fermeture (sans message de confirmation)
-        window.addEventListener('beforeunload', function(e) {
-            sauvegarderProgres();
-            // Ne pas définir e.returnValue pour éviter le message de confirmation
-        });
-        
-        // Bloquer les raccourcis de navigation
-        window.addEventListener('keydown', function(e) {
-            if (e.altKey && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
-                e.preventDefault();
-                showRefreshWarning();
-                return false;
-            }
-            
-            // Bloquer Ctrl+W (fermeture onglet)
-            if ((e.ctrlKey || e.metaKey) && (e.key === "w" || e.key === "W")) {
-                e.preventDefault();
-                showNotification('🔒 Fermeture d\'onglet désactivée');
-                return false;
-            }
-        });
-        
-        // Détection des tentatives de rafraîchissement via les événements de la souris
-        let mouseX, mouseY;
-        document.addEventListener('mousemove', function(e) {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        });
-        
-        // Bloquer les gestes du trackpad pour refresh
-        document.addEventListener('wheel', function(e) {
-            if (e.ctrlKey) {
-                e.preventDefault();
-                showNotification('🔒 Zoom désactivé');
-                return false;
-            }
-        }, { passive: false });
-        
-        // Sauvegarde automatique périodique (toutes les 10 secondes)
-        setInterval(() => {
-            sauvegarderProgres();
-        }, 10000);
-        
-        // Fonction de notification améliorée
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 2000);
+        // Gestionnaire clic option si non répondue
+        if (!alreadyAnswered && !isLocked[currentIdx] && !quizFinished) {
+            const optionDivs = document.querySelectorAll('.option-card');
+            optionDivs.forEach(div => {
+                div.addEventListener('click', (e) => {
+                    if (isLocked[currentIdx] || quizFinished) return;
+                    const chosenLetter = div.getAttribute('data-opt-letter');
+                    if (chosenLetter) handleAnswer(chosenLetter);
+                });
+            });
+        } else if (alreadyAnswered) {
+            const optionDivs = document.querySelectorAll('.option-card');
+            optionDivs.forEach(div => {
+                div.style.cursor = "default";
+                div.style.opacity = "0.7";
+                div.style.pointerEvents = "none";
+            });
         }
         
-        // Nettoyer la console
-        if (window.console) {
-            const noop = function() {};
-            console.log = noop;
-            console.info = noop;
-            console.warn = noop;
-            console.debug = noop;
-            console.table = noop;
-            console.dir = noop;
-            console.trace = noop;
-            console.group = noop;
-            console.groupEnd = noop;
+        qCounterSpan.innerText = `Question ${currentIdx+1} / ${TOTAL}`;
+    }
+    
+    // Traitement réponse sans aperçu, mais avec gestion des paliers et score
+    function handleAnswer(selectedLetter) {
+        if (isLocked[currentIdx] || quizFinished) return;
+        isLocked[currentIdx] = true;
+        
+        const q = questions[currentIdx];
+        const isCorrect = (selectedLetter === q.correct);
+        userSelections[currentIdx] = selectedLetter;
+        if (isCorrect) {
+            currentScore++;
+            updateScoreUI();
         }
         
-        // Bloquer les tentatives d'ouverture des outils dev
-        window.addEventListener('devtools', function(e) {
-            e.preventDefault();
-            showNotification('🔒 Outils développeur bloqués');
-        });
+        // Mise à jour visuelle sélection
+        renderCurrent();
         
-        // Override de la fonction window.open
-        const originalOpen = window.open;
-        window.open = function() {
-            showNotification('🔒 Ouverture de nouvelle fenêtre désactivée');
-            return null;
-        };
+        // Vérifier paliers 20 et 40 (on le fait après la réponse, en fonction du nombre de questions répondues)
+        const answeredCount = userSelections.filter(a => a !== null).length;
+        // answeredCount est le nombre de questions déjà traitées (y compris celle-ci)
+        if (answeredCount === 20 || answeredCount === 40) {
+            showPalierMotivation(answeredCount, currentScore);
+        }
         
-        // Protection contre l'utilisation de la touche Windows (optionnel)
-        window.addEventListener('keydown', function(e) {
-            if (e.key === "Meta" || e.key === "Win") {
-                e.preventDefault();
-                return false;
+        // Passage automatique
+        setTimeout(() => {
+            if (currentIdx + 1 < TOTAL) {
+                currentIdx++;
+                renderCurrent();
+            } else {
+                finishQuizAndShowFullReport();
             }
-        });
+        }, 380);
+    }
+    
+    // Afficher résultat final complet
+    function finishQuizAndShowFullReport() {
+        quizFinished = true;
+        questionBlock.innerHTML = `<div style="text-align:center; padding:2rem;">✅ Quiz terminé ! Voici votre note et le corrigé détaillé. ✅</div>`;
+        clearTranslation();
         
-        // Exposer les fonctions globales
-        window.verifierReponses = verifierReponses;
-        window.sauvegarderProgres = sauvegarderProgres;
-        window.chargerProgres = chargerProgres;
-        window.showNotification = showNotification;
-        window.showRefreshWarning = showRefreshWarning;
+        const totalCorrect = currentScore;
+        const percent = Math.round((totalCorrect / TOTAL) * 100);
+        let finalMessage = "";
+        if (totalCorrect === TOTAL) finalMessage = "🏆 PARFAIT ! Maîtrise absolue des possessifs et démonstratifs ! 🏆";
+        else if (totalCorrect >= 50) finalMessage = "🌟 Très bonne maîtrise ! Consultez les explications ci-dessous pour parfaire votre niveau.";
+        else if (totalCorrect >= 40) finalMessage = "👍 Bonnes bases, révisez les petites erreurs à l'aide du corrigé détaillé.";
+        else finalMessage = "📖 Revoyez les adjectifs possessifs (mon, ton, son, notre, votre, leur) et les démonstratifs (ce, cet, cette, ces). Le corrigé complet vous aidera.";
         
-        // Initialisation
-        (async function init() {
-            await ouvrirDB();
-            await autoCharger();
-            await sauvegarderProgres();
-            
-            // Vérification initiale des outils dev
-            detectDevTools();
-        })();
-    </script>
-</body>
-</html>
+        let listHtml = `<div class="final-report">
+            <div class="final-header">📊 RÉSULTAT FINAL</div>
+            <div style="text-align:center"><span class="final-score">${totalCorrect} / ${TOTAL} (${percent}%)</span></div>
+            <p style="text-align:center; margin: 15px 0;">${finalMessage}</p>
+            <div class="questions-list">
+                <h3>📋 Liste complète des 60 questions avec vos réponses et les corrections :</h3>
+        `;
+        
+        for (let i = 0; i < TOTAL; i++) {
+            const q = questions[i];
+            const userChoice = userSelections[i];
+            const lettersIndex = ['A','B','C','D'];
+            const isOk = (userChoice === q.correct);
+            const userText = userChoice ? q.options[lettersIndex.indexOf(userChoice)] : "(non répondue)";
+            const correctAnswerText = q.options[lettersIndex.indexOf(q.correct)];
+            const statusIcon = isOk ? "✅" : "❌";
+            const borderClass = isOk ? "correct" : "wrong";
+            listHtml += `
+                <div class="question-summary ${borderClass}">
+                    <strong>${statusIcon} Q${i+1} : ${q.q}</strong><br>
+                    <span>✏️ Votre réponse : ${userChoice ? userChoice : "—"} → "${userText}"</span><br>
+                    <span>📌 Bonne réponse : ${q.correct} → "${correctAnswerText}"</span><br>
+                    <small>📖 Explication : ${q.explanation}</small>
+                    ${q.mg ? `<br><span style="font-size:0.8rem;">🇲🇬 Malagasy: ${q.mg}</span>` : ''}
+                </div>
+            `;
+        }
+        listHtml += `<button class="restart-btn" id="restartQuizBtn">🔄 Recommencer un nouveau quiz (60 questions aléatoires)</button>`;
+        listHtml += `</div></div>`;
+        finalContainer.innerHTML = listHtml;
+        
+        const restartBtn = document.getElementById('restartQuizBtn');
+        if (restartBtn) {
+            restartBtn.addEventListener('click', () => {
+                resetAndRestart();
+            });
+        }
+    }
+    
+    function resetAndRestart() {
+        questions = getRandomQuestions(TOTAL);
+        userSelections = new Array(TOTAL).fill(null);
+        isLocked = new Array(TOTAL).fill(false);
+        currentScore = 0;
+        currentIdx = 0;
+        quizFinished = false;
+        updateScoreUI();
+        finalContainer.innerHTML = '';
+        if (motivationDiv) motivationDiv.style.display = 'none';
+        clearTranslation();
+        renderCurrent();
+    }
+    
+    // Téléchargement du fichier HTML
+    downloadBtn.addEventListener('click', () => {
+        const htmlContent = document.documentElement.outerHTML;
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'qcm_possessifs_malagasy.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+    
+    // Lancement
+    renderCurrent();
+    updateScoreUI();
+</script>
+
+</body></html>
