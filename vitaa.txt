@@ -240,6 +240,10 @@
             overflow: auto;
             animation: fadeIn 0.2s ease;
         }
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1.1); opacity: 1; }
+}
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -803,14 +807,14 @@ const dialoguerLecons = [
         } catch { return null; }
     }
     
-    async function telechargerFichier(nomFichier) {
-        const url = `${WORKER_URL}/${nomFichier}`;
-        const response = await fetch(url, { cache: 'no-cache' });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const content = await response.text();
-        if (!content || content.length < 50) throw new Error("Contenu invalide");
-        return content;
-    }
+   async function telechargerFichier(nomFichier) {
+    const url = `${WORKER_URL}/${nomFichier}?t=${Date.now()}`;
+    const response = await fetch(url, { cache: 'no-cache' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const content = await response.text();
+    if (!content || content.length < 10) throw new Error("Contenu invalide");
+    return content;
+} 
     
     async function getRemoteVersionDate(nomFichier) {
         try {
@@ -832,11 +836,7 @@ const dialoguerLecons = [
         } catch { return null; }
     }
     
-    async function stockerEnIndexedDB(nomFichier, contenuHTML) {
-        const dbName = nomFichier.replace('.txt', '');
-        const version = new Date().toLocaleString('fr-FR');
-        await stockerContenuEtVersion(dbName, contenuHTML, version);
-    }
+
     
     // ======================= GÉNÉRATION DE TOUS LES FICHIERS (inchangée) =======================
 function genererTousLesFichiersAVerifier() {
@@ -912,225 +912,30 @@ function genererTousLesFichiersAVerifier() {
     return fichiers;
 }
 
-// ======================= SYSTÈME DE VÉRIFICATION SIMPLIFIÉ =======================
+// ======================= SYSTÈME DE VÉRIFICATION SIMPLIFIÉ (CORRIGÉ) =======================
 let estEnModeBlob = false;
 let verificationActive = false;
-let verificationArretDemande = false;
-let affichageVerification = null;
+let progressContainer = null;
+let progressBar = null;
+let progressPercent = null;
+let progressStatus = null;
+let idleContainer = null;
 
-// ======================= AFFICHAGE DE DÉBOGAGE VISIBLE =======================
 function afficherDebug(message, type = 'info') {
     const timestamp = new Date().toLocaleTimeString();
     console.log(`[${timestamp}] ${message}`);
-    
-    const debugDiv = document.createElement('div');
-    let bgColor = '#3498db';
-    if (type === 'error') bgColor = '#e74c3c';
-    if (type === 'success') bgColor = '#2ecc71';
-    if (type === 'warning') bgColor = '#f39c12';
-    
-    debugDiv.style.cssText = `
-        position: fixed;
-        bottom: 10px;
-        left: 10px;
-        background: ${bgColor};
-        color: white;
-        padding: 8px 15px;
-        border-radius: 8px;
-        font-size: 12px;
-        font-family: monospace;
-        z-index: 99999;
-        max-width: 90%;
-        word-break: break-word;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        pointer-events: none;
-        opacity: 0.95;
-    `;
-    debugDiv.innerHTML = `🔍 ${message}`;
-    document.body.appendChild(debugDiv);
-    
-    setTimeout(() => {
-        if (debugDiv.parentNode) debugDiv.remove();
-    }, 5000);
 }
 
-// ======================= AFFICHAGE DE LA LISTE DE VÉRIFICATION À L'ÉCRAN =======================
-function creerAffichageVerification() {
-    // Supprimer l'ancien affichage s'il existe
-    if (affichageVerification) {
-        affichageVerification.remove();
-    }
-    
-    // Créer le conteneur principal
-    affichageVerification = document.createElement('div');
-    affichageVerification.id = 'verificationListe';
-    affichageVerification.style.cssText = `
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        width: 380px;
-        max-height: 85vh;
-        background: rgba(0,0,0,0.92);
-        border-radius: 12px;
-        padding: 12px;
-        z-index: 100000;
-        overflow-y: auto;
-        font-family: monospace;
-        font-size: 11px;
-        color: #ccc;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        backdrop-filter: blur(8px);
-        border: 1px solid #444;
-    `;
-    
-    affichageVerification.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #555;">
-            <strong style="color: #ffd966;">📋 Vérification des fichiers</strong>
-            <button id="fermerVerification" style="background: #e74c3c; border: none; color: white; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 14px; font-weight: bold;">✕</button>
-        </div>
-        <div id="listeFichiersVerification">
-            <div style="text-align: center; color: #888;">Chargement en cours...</div>
-        </div>
-        <div id="progressionVerification" style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #555; font-size: 10px; color: #2ecc71;"></div>
-    `;
-    
-    document.body.appendChild(affichageVerification);
-    
-    // Bouton pour fermer
-    document.getElementById('fermerVerification').addEventListener('click', () => {
-        if (affichageVerification) affichageVerification.remove();
-        affichageVerification = null;
-    });
-    
-    return affichageVerification;
-}
 
-function mettreAJourAffichageFichiers(fichiers, versionsLocale, enCours = false) {
-    if (!affichageVerification) return;
-    
-    const container = document.getElementById('listeFichiersVerification');
-    if (!container) return;
-    
-    let html = '<div style="display: flex; flex-direction: column; gap: 6px;">';
-    
-    for (const fichier of fichiers) {
-        const versionLocale = versionsLocale[fichier.nom] || '❌ Non téléchargé';
-        const estDifferent = versionLocale !== fichier.version && versionLocale !== '❌ Non téléchargé';
-        const estManquant = versionLocale === '❌ Non téléchargé';
-        
-        let couleurLocale = '#8bc34a';
-        let couleurServeur = '#8bc34a';
-        let messageStatut = '';
-        let bgColor = 'transparent';
-        
-        if (estManquant) {
-            couleurLocale = '#ff6b6b';
-            couleurServeur = '#ffd966';
-            messageStatut = '<div style="color: #ffa500; font-size: 9px; margin-top: 3px;">📥 Non téléchargé → téléchargement programmé</div>';
-            bgColor = 'rgba(255,107,107,0.1)';
-        } else if (estDifferent) {
-            couleurLocale = '#ff6b6b';
-            couleurServeur = '#ff6b6b';
-            messageStatut = '<div style="color: #ff6b6b; font-size: 9px; margin-top: 3px;">⚠️ Différence détectée → mise à jour programmée</div>';
-            bgColor = 'rgba(255,107,107,0.1)';
-        } else {
-            messageStatut = '<div style="color: #4caf50; font-size: 9px; margin-top: 3px;">✅ À jour</div>';
-        }
-        
-        // Tronquer les dates pour l'affichage
-        const dateLocale = versionLocale === '❌ Non téléchargé' ? '❌ Non téléchargé' : versionLocale.substring(0, 19);
-        const dateServeur = fichier.version.substring(0, 19);
-        
-        html += `
-            <div style="border-bottom: 1px solid #333; padding: 6px 0; background: ${bgColor}; border-radius: 6px; padding: 6px 8px;">
-                <div style="font-weight: bold; color: #ffd966; font-size: 12px;">📄 ${fichier.nom}</div>
-                <div style="display: flex; justify-content: space-between; margin-top: 4px;">
-                    <span style="color: ${couleurLocale};">💾 DB: ${dateLocale}</span>
-                    <span style="color: ${couleurServeur};">🌐 Serveur: ${dateServeur}</span>
-                </div>
-                ${messageStatut}
-            </div>
-        `;
-    }
-    
-    html += '</div>';
-    container.innerHTML = html;
-    
-    if (enCours) {
-        const footer = document.createElement('div');
-        footer.style.cssText = 'margin-top: 10px; padding-top: 5px; color: #3498db; font-size: 10px; text-align: center;';
-        footer.innerHTML = '🔄 Vérification en cours...';
-        container.appendChild(footer);
-    }
-}
-
-function mettreAJourProgression(current, total, misAJour) {
-    if (!affichageVerification) return;
-    
-    const progressionDiv = document.getElementById('progressionVerification');
-    if (!progressionDiv) return;
-    
-    const pourcent = total > 0 ? ((current / total) * 100).toFixed(1) : 0;
-    progressionDiv.innerHTML = `
-        <div style="display: flex; justify-content: space-between;">
-            <span>📊 Progression: ${current}/${total}</span>
-            <span>${pourcent}%</span>
-        </div>
-        <div>🔄 Mises à jour effectuées: ${misAJour}</div>
-        <div style="background: #2c3e50; border-radius: 10px; margin-top: 5px; overflow: hidden;">
-            <div style="width: ${pourcent}%; height: 3px; background: #2ecc71; transition: width 0.3s;"></div>
-        </div>
-    `;
-}
-
-function terminerAffichageVerification(total, misAJour) {
-    if (!affichageVerification) return;
-    
-    const progressionDiv = document.getElementById('progressionVerification');
-    if (progressionDiv) {
-        progressionDiv.innerHTML += `
-            <div style="margin-top: 8px; padding-top: 5px; border-top: 1px solid #2ecc71; color: #2ecc71; text-align: center; font-weight: bold;">
-                ✅ Vérification terminée - ${misAJour} fichier(s) mis à jour sur ${total}
-            </div>
-        `;
-    }
-    
-    // Disparaître automatiquement après 10 secondes
-    setTimeout(() => {
-        if (affichageVerification) {
-            affichageVerification.style.opacity = '0.5';
-            setTimeout(() => {
-                if (affichageVerification) affichageVerification.remove();
-                affichageVerification = null;
-            }, 1000);
-        }
-    }, 10000);
-}
-
-afficherDebug("🚀 Script de vérification chargé", 'success');
-
-// Télécharger un fichier avec cache buster
-async function telechargerFichier(nomFichier) {
-    const url = `${WORKER_URL}/${nomFichier}?t=${Date.now()}`;
-    const response = await fetch(url, { cache: 'no-cache' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const content = await response.text();
-    if (!content || content.length < 10) throw new Error("Contenu invalide");
-    return content;
-}
-
-// Récupérer TOUS les fichiers depuis date_rehetra.txt
 async function recupererTousLesFichiersAvecVersions() {
     afficherDebug("🌐 Téléchargement de date_rehetra.txt...", 'info');
     try {
         const url = DATE_INFO_URL + '?t=' + Date.now();
         const response = await fetch(url);
-        
         if (!response.ok) {
             afficherDebug(`❌ HTTP ${response.status}`, 'error');
             return [];
         }
-        
         const contenu = await response.text();
         afficherDebug(`📥 Fichier reçu: ${(contenu.length / 1024).toFixed(2)} KB`, 'success');
         
@@ -1141,23 +946,31 @@ async function recupererTousLesFichiersAvecVersions() {
             const block = blocks[i];
             const fichierMatch = block.match(/📁 Fichier:\s*([^\n]+)/);
             if (!fichierMatch) continue;
-            
             const nomFichier = fichierMatch[1].trim();
             if (!nomFichier) continue;
             
-            const dayMatch = block.match(/📅\s*([^\n]+)/);
-            const timeMatch = block.match(/⏰\s*([^\n]+)/);
+            // Extraire la date et l'heure complètes
+            let versionComplete = null;
             
-            let version = null;
+            // Chercher le format "📅 08/06/2026 ⏰ 14:30:25"
+            const dayMatch = block.match(/📅\s*([\d\/]+)/);
+            const timeMatch = block.match(/⏰\s*([\d:]+)/);
+            
             if (dayMatch && timeMatch) {
-                version = `${dayMatch[1].trim()} ${timeMatch[1].trim()}`;
+                // Version complète = DATE + HEURE (ex: "08/06/2026 14:30:25")
+                versionComplete = `${dayMatch[1].trim()} ${timeMatch[1].trim()}`;
             } else {
-                version = new Date().toLocaleString('fr-FR');
+                // Fallback: chercher un format simple
+                const simpleMatch = block.match(/📆\s*([^\n]+)/);
+                if (simpleMatch) {
+                    versionComplete = simpleMatch[1].trim();
+                } else {
+                    versionComplete = "1970/01/01 00:00:00";
+                }
             }
             
-            fichiers.push({ nom: nomFichier, version: version });
+            fichiers.push({ nom: nomFichier, version: versionComplete });
         }
-        
         afficherDebug(`✅ ${fichiers.length} fichiers trouvés`, 'success');
         return fichiers;
     } catch (error) {
@@ -1166,32 +979,33 @@ async function recupererTousLesFichiersAvecVersions() {
     }
 }
 
-// Mettre à jour un fichier (supprime l'ancien, télécharge le nouveau)
 async function mettreAJourFichier(fichier) {
     try {
         const dbName = fichier.nom.replace('.txt', '');
-        afficherDebug(`🆕 Mise à jour: ${fichier.nom}`, 'info');
+        afficherDebug(`🆕 Vérification: ${fichier.nom} (serveur: ${fichier.version})`, 'info');
         
-        // 1. Supprimer l'ancienne base
+        const contenuExistant = await recupererContenu(dbName);
+        const versionLocale = await recupererVersion(dbName);
+        
+        // COMPARAISON STRICTE de la chaîne complète (DATE + HEURE)
+        // Pas de new Date() ! Comparaison textuelle directe
+        if (versionLocale === fichier.version) {
+            afficherDebug(`✅ Déjà à jour: ${fichier.nom} (${versionLocale})`, 'success');
+            return false;
+        }
+        
+        afficherDebug(`🔄 Mise à jour: ${fichier.nom} (${versionLocale} → ${fichier.version})`, 'info');
+        
+        // Supprimer l'ancienne DB
         await new Promise((resolve) => {
             const deleteRequest = indexedDB.deleteDatabase(dbName);
-            deleteRequest.onsuccess = () => {
-                afficherDebug(`🗑️ Ancien supprimé: ${fichier.nom}`, 'success');
-                resolve();
-            };
-            deleteRequest.onerror = () => {
-                afficherDebug(`⚠️ Erreur suppression: ${fichier.nom}`, 'warning');
-                resolve();
-            };
+            deleteRequest.onsuccess = () => { resolve(); };
+            deleteRequest.onerror = () => { resolve(); };
         });
         
-        // 2. Télécharger le nouveau contenu
         const nouveauContenu = await telechargerFichier(fichier.nom);
-        
-        // 3. Stocker le nouveau contenu
         await stockerContenuEtVersion(dbName, nouveauContenu, fichier.version);
-        afficherDebug(`✅ Nouveau stocké: ${fichier.nom}`, 'success');
-        
+        afficherDebug(`✅ Stocké: ${fichier.nom} (version: ${fichier.version})`, 'success');
         return true;
     } catch (error) {
         console.error(`❌ Erreur ${fichier.nom}:`, error);
@@ -1199,219 +1013,141 @@ async function mettreAJourFichier(fichier) {
     }
 }
 
-// Vérification COMPLÈTE avec affichage à l'écran
-async function verificationComplete() {
-    if (verificationActive) {
-        afficherDebug("⏳ Vérification déjà en cours...", 'info');
-        return;
-    }
-    
-    if (estEnModeBlob) {
-        afficherDebug("⏸️ Mode BLOB - vérification en attente", 'info');
-        return;
-    }
-    
-    // Créer l'affichage à l'écran
-    creerAffichageVerification();
-    
+// ======================= VRAIE PROGRESSION AVEC MISE À JOUR RÉELLE =======================
+async function verificationCompleteAvecProgression() {
+    if (verificationActive) return;
     verificationActive = true;
-    afficherDebug("🔍 Début de la vérification...", 'info');
+    
+    // Récupérer les éléments
+    const progressContainerLocal = document.getElementById('progressContainer');
+    const progressBarLocal = document.getElementById('progressBar');
+    const progressPercentLocal = document.getElementById('progressPercent');
+    const progressStatusLocal = document.getElementById('progressStatus');
+    const idleContainerLocal = document.getElementById('idleContainer');
+    
+    // Afficher la barre
+    if (progressContainerLocal) progressContainerLocal.style.display = 'block';
+    if (idleContainerLocal) idleContainerLocal.style.display = 'none';
+    if (progressBarLocal) progressBarLocal.style.width = '0%';
+    if (progressPercentLocal) progressPercentLocal.innerHTML = '0%';
+    if (progressStatusLocal) progressStatusLocal.innerHTML = 'Téléchargement des fichiers...';
     
     try {
-        // Récupérer les fichiers du serveur
+        // 1. Récupérer la liste des fichiers depuis le serveur
         const fichiersServeur = await recupererTousLesFichiersAvecVersions();
-        
-        if (fichiersServeur.length === 0) {
-            afficherDebug("❌ Aucun fichier trouvé sur le serveur!", 'error');
-            if (affichageVerification) affichageVerification.remove();
-            verificationActive = false;
-            return;
-        }
-        
-        // Récupérer les versions locales
-        const versionsLocale = {};
-        for (const fichier of fichiersServeur) {
-            const dbName = fichier.nom.replace('.txt', '');
-            const version = await recupererVersion(dbName);
-            versionsLocale[fichier.nom] = version || '❌ Non téléchargé';
-        }
-        
-        // Afficher la liste des fichiers avec comparaison
-        mettreAJourAffichageFichiers(fichiersServeur, versionsLocale, true);
-        
         const total = fichiersServeur.length;
-        let compteurMisAJour = 0;
-        let compteurVerifies = 0;
+        let faits = 0;
         
-        for (let i = 0; i < total; i++) {
-            // Pause si mode blob
-            if (estEnModeBlob) {
-                afficherDebug(`⏸️ PAUSE à ${i + 1}/${total} - leçon ouverte`, 'warning');
-                verificationActive = false;
-                return;
-            }
+        if (progressStatusLocal) progressStatusLocal.innerHTML = `📡 ${total} fichiers à vérifier...`;
+        
+        // 2. Parcourir chaque fichier
+        for (const fichier of fichiersServeur) {
+            const versionLocale = await recupererVersion(fichier.nom.replace('.txt', ''));
             
-            const fichier = fichiersServeur[i];
-            const dbName = fichier.nom.replace('.txt', '');
-            const versionLocale = await recupererVersion(dbName);
-            
-            // Comparer et mettre à jour si différent
+            // Comparaison textuelle
             if (versionLocale !== fichier.version) {
-                const success = await mettreAJourFichier(fichier);
-                if (success) {
-                    compteurMisAJour++;
-                    versionsLocale[fichier.nom] = fichier.version;
-                    // Rafraîchir l'affichage après mise à jour
-                    mettreAJourAffichageFichiers(fichiersServeur, versionsLocale, true);
-                }
+                if (progressStatusLocal) progressStatusLocal.innerHTML = `⬇️ Téléchargement: ${fichier.nom}`;
+                await mettreAJourFichier(fichier);
             }
             
-            compteurVerifies++;
-            
-            // Mettre à jour la progression
-            mettreAJourProgression(compteurVerifies, total, compteurMisAJour);
-            
-            // Micro-pause
-            if (compteurVerifies % 10 === 0) {
-                await new Promise(resolve => setTimeout(resolve, 5));
-            }
+            faits++;
+            const percent = (faits / total) * 100;
+            if (progressBarLocal) progressBarLocal.style.width = percent + '%';
+            if (progressPercentLocal) progressPercentLocal.innerHTML = Math.round(percent) + '%';
+            if (progressStatusLocal) progressStatusLocal.innerHTML = `📥 ${faits}/${total} fichiers traités`;
         }
         
-        // Affichage final
-        mettreAJourAffichageFichiers(fichiersServeur, versionsLocale);
-        terminerAffichageVerification(total, compteurMisAJour);
+        if (progressStatusLocal) progressStatusLocal.innerHTML = '✅ Mise à jour terminée !';
+        if (progressBarLocal) progressBarLocal.style.width = '100%';
+        if (progressPercentLocal) progressPercentLocal.innerHTML = '100%';
         
-        afficherDebug(`🎉 VÉRIFICATION TERMINÉE: ${total} fichiers, ${compteurMisAJour} mises à jour`, 'success');
-        
-        // Rafraîchir l'affichage des badges
+        // Rafraîchir les badges
         await colorerLeconsExistantesDansPage();
         await colorerExercicesDansPage();
         
     } catch (error) {
-        afficherDebug(`❌ Erreur: ${error.message}`, 'error');
+        console.error('Erreur:', error);
+        if (progressStatusLocal) progressStatusLocal.innerHTML = '❌ Erreur lors de la mise à jour';
+    } finally {
+        verificationActive = false;
+        
+        // Cacher la barre après 2 secondes
+        setTimeout(() => {
+            if (progressContainerLocal) progressContainerLocal.style.display = 'none';
+            if (idleContainerLocal) idleContainerLocal.style.display = 'flex';
+        }, 2000);
+    }
+}
+
+// ======================= FONCTIONS MANQUANTES =======================
+
+// 1. Fonction verificationComplete (appelée dans autoUpdateOnStart)
+async function verificationComplete() {
+    if (verificationActive) return;
+    verificationActive = true;
+    
+    try {
+        const fichiersServeur = await recupererTousLesFichiersAvecVersions();
+        if (fichiersServeur.length === 0) return;
+        
+        let compteurMisAJour = 0;
+        for (const fichier of fichiersServeur) {
+            const versionLocale = await recupererVersion(fichier.nom.replace('.txt', ''));
+            // Comparaison textuelle stricte (date + heure)
+            if (versionLocale !== fichier.version) {
+                const success = await mettreAJourFichier(fichier);
+                if (success) compteurMisAJour++;
+            }
+        }
+        
+        if (compteurMisAJour > 0) {
+            console.log(`✅ ${compteurMisAJour} fichier(s) mis à jour silencieusement`);
+            // Rafraîchir les badges
+            await colorerLeconsExistantesDansPage();
+            await colorerExercicesDansPage();
+        }
+    } catch (error) {
+        console.error('Erreur dans verificationComplete:', error);
     } finally {
         verificationActive = false;
     }
 }
 
-function demarrerVerification() {
-    afficherDebug("📞 demarrerVerification() appelée", 'info');
-    
-    if (estEnModeBlob) {
-        afficherDebug("⏭️ Mode BLOB actif - vérification en attente", 'info');
-        return;
-    }
-    
-    if (verificationActive) {
-        afficherDebug("⏭️ Vérification déjà active", 'info');
-        return;
-    }
-    
-    // Petit délai pour laisser la page s'installer
-    setTimeout(() => {
-        verificationComplete();
-    }, 100);
+// 2. Fonction stockerEnIndexedDB (appelée dans chargerLecon et telechargerEtOuvrirExercice)
+async function stockerEnIndexedDB(nomFichier, contenu) {
+    const dbName = nomFichier.replace('.txt', '');
+    // Version = date et heure actuelles du téléchargement
+    const maintenant = new Date();
+    const version = `${maintenant.toLocaleDateString('fr-FR')} ${maintenant.toLocaleTimeString('fr-FR')}`;
+    await stockerContenuEtVersion(dbName, contenu, version);
 }
 
-// ======================= GESTION PAUSE/REPRISE PENDANT BLOB =======================
-(function installPauseReprise() {
-    function verifierChangementMode() {
-        const estBlob = window.location.href.startsWith('blob:');
-        
-        if (estBlob && !estEnModeBlob) {
-            afficherDebug("🌐 ENTRÉE mode BLOB - pause", 'warning');
-            estEnModeBlob = true;
-        } else if (!estBlob && estEnModeBlob) {
-            afficherDebug("🏠 SORTIE mode BLOB - reprise", 'success');
-            estEnModeBlob = false;
-            setTimeout(() => {
-                if (!verificationActive) {
-                    verificationComplete();
-                }
-            }, 500);
-        }
-    }
-    
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
-    
-    history.pushState = function() {
-        originalPushState.apply(this, arguments);
-        setTimeout(verifierChangementMode, 50);
-    };
-    
-    history.replaceState = function() {
-        originalReplaceState.apply(this, arguments);
-        setTimeout(verifierChangementMode, 50);
-    };
-    
-    window.addEventListener('popstate', () => {
-        setTimeout(verifierChangementMode, 50);
-    });
-    
-    window.addEventListener('load', () => {
-        setTimeout(verifierChangementMode, 100);
-    });
-})();
 
-// ======================= INITIALISATION AU CHARGEMENT =======================
-afficherDebug("🚀 Initialisation du système de vérification...", 'info');
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        afficherDebug("📄 DOMContentLoaded - lancement dans 500ms", 'info');
-        demarrerVerification();
-    });
-} else {
-    afficherDebug("📄 Page déjà chargée - lancement dans 500ms", 'info');
-    demarrerVerification();
-}
-
-// ======================= COMMANDES DEBUG (dans console) =======================
-window.verificationStatus = async () => {
-    afficherDebug(`🌐 Mode: ${estEnModeBlob ? 'BLOB (pause)' : 'NORMAL'}`, 'info');
-    afficherDebug(`✅ Vérification active: ${verificationActive}`, 'info');
-    console.log(`🌐 Mode: ${estEnModeBlob ? 'BLOB' : 'NORMAL'}`);
-    console.log(`✅ Vérification active: ${verificationActive}`);
-};
-
-window.reinitialiserVerification = async () => {
-    afficherDebug("🔄 Réinitialisation manuelle...", 'warning');
-    verificationActive = false;
-    setTimeout(() => {
-        demarrerVerification();
-    }, 500);
-};
-
-window.verifierMaintenant = async () => {
-    afficherDebug("🧪 Vérification forcée...", 'info');
-    verificationActive = false;
-    verificationComplete();
-};
-
-console.log("✅ Système de vérification avec affichage écran actif");
-afficherDebug("✅ Système actif - la vérification démarre dans quelques secondes", 'success');
 
 // ======================= CHARGEMENT DES LEÇONS =======================
     let originalPageUrl = window.location.href;
     let historiqueNavigation = [];
     
-   
-    async function chargerLecon(titre, nomFichier, urlComplet, contenuDefaut) {
+async function chargerLecon(titre, nomFichier, urlComplet, contenuDefaut) {
     const modal = document.createElement('div');
     modal.className = 'modal-fullscreen';
     modal.innerHTML = `
     <div class="modal-fullscreen-header">
-        <h2>📖 Chargement - ${titre}</h2>
+        <h2>📖 Chargement : ${titre}</h2>
         <button class="btn-close-fullscreen" id="closeLoadingBtn">✕</button>
     </div>
-    <div class="modal-fullscreen-body" style="display: flex; align-items: center; justify-content: center;" data-nom-fichier="${nomFichier}">
+    <div class="modal-fullscreen-body" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);" data-nom-fichier="${nomFichier}">
         <div style="text-align: center;">
             <div class="loading-spinner"></div>
-            <p style="margin-top: 15px;">Chargement...</p>
+            <div style="display: flex; justify-content: center; gap: 8px; margin-top: 20px;">
+                <div style="width: 8px; height: 8px; background: #60a5fa; border-radius: 50%; animation: bounce 1.2s infinite ease;"></div>
+                <div style="width: 8px; height: 8px; background: #a78bfa; border-radius: 50%; animation: bounce 1.2s infinite ease; animation-delay: 0.2s;"></div>
+                <div style="width: 8px; height: 8px; background: #f472b6; border-radius: 50%; animation: bounce 1.2s infinite ease; animation-delay: 0.4s;"></div>
+            </div>
+            <p style="margin-top: 15px; color: #f1f5f9;">Chargement...</p>
         </div>
     </div>
-`;
+    `;
     document.body.appendChild(modal);
     document.getElementById('closeLoadingBtn')?.addEventListener('click', () => modal.remove());
     
@@ -1479,11 +1215,39 @@ function getNiveauParFichier(nomFichier) {
     return mapNiveau[prefix] || 'débutant 1';
 }
 
-// ➕ AJOUT: Soumission du code
+// ➕ AJOUT: Fonction pour afficher une notification au centre
+function afficherNotificationCentre(message, type = 'error') {
+    // Supprimer l'ancienne notification si elle existe
+    const ancienne = document.getElementById('centreNotification');
+    if (ancienne) ancienne.remove();
+    
+    const notif = document.createElement('div');
+    notif.id = 'centreNotification';
+    notif.innerHTML = message;
+    notif.style.position = 'fixed';
+    notif.style.top = '50%';
+    notif.style.left = '50%';
+    notif.style.transform = 'translate(-50%, -50%)';
+    notif.style.background = type === 'error' ? '#c0392b' : '#2ecc71';
+    notif.style.color = 'white';
+    notif.style.padding = '15px 30px';
+    notif.style.borderRadius = '12px';
+    notif.style.zIndex = '30001';
+    notif.style.fontSize = '1.1rem';
+    notif.style.fontWeight = 'bold';
+    notif.style.textAlign = 'center';
+    notif.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+    notif.style.animation = 'fadeIn 0.3s ease';
+    document.body.appendChild(notif);
+    
+    setTimeout(() => notif.remove(), 5000);
+}
+
+// MODIFIER submitModalCode
 async function submitModalCode() {
     const code = document.getElementById('modalCode').value.trim().toUpperCase();
     if (!code) {
-        alert('Veuillez entrer un code');
+        afficherNotificationCentre('⚠️ Ampidiro ny code', 'error');
         return;
     }
     
@@ -1501,11 +1265,16 @@ async function submitModalCode() {
             <h2>🔐 Activation en cours</h2>
             <button class="btn-close-fullscreen" id="closeLoadingBtn">✕</button>
         </div>
-        <div class="modal-fullscreen-body" style="display: flex; align-items: center; justify-content: center;">
-            <div style="text-align: center;">
-                <div class="loading-spinner"></div>
-                <p>Vérification du code...</p>
-            </div>
+      <div class="modal-fullscreen-body" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+    <div style="text-align: center;">
+        <div class="loading-spinner"></div>
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 20px;">
+            <div style="width: 8px; height: 8px; background: #60a5fa; border-radius: 50%; animation: bounce 1.2s infinite ease;"></div>
+            <div style="width: 8px; height: 8px; background: #a78bfa; border-radius: 50%; animation: bounce 1.2s infinite ease; animation-delay: 0.2s;"></div>
+            <div style="width: 8px; height: 8px; background: #f472b6; border-radius: 50%; animation: bounce 1.2s infinite ease; animation-delay: 0.4s;"></div>
+        </div>
+        <p style="color: #f1f5f9; margin-top: 15px;">Vérification du code...</p>
+    </div>
         </div>
     `;
     document.body.appendChild(modal);
@@ -1531,7 +1300,6 @@ async function submitModalCode() {
                 
                 const blob = new Blob([contenu], { type: 'text/html' });
                 const blobUrl = URL.createObjectURL(blob);
-                localStorage.setItem('dernierContexteLecon', JSON.stringify({ leconTitre: titre, nomFichier: fileName }));
                 localStorage.setItem('pagePrincipaleUrl', window.location.href);
                 window.location.href = blobUrl;
             } else {
@@ -1539,11 +1307,13 @@ async function submitModalCode() {
             }
         } else {
             modal.remove();
-            alert('❌ Code invalide');
+            // ✅ Notification au CENTRE
+            afficherNotificationCentre('❌ Code tsy mety!', 'error');
         }
     } catch (error) {
         modal.remove();
-        alert('❌ Erreur lors de l\'activation');
+        // ✅ Notification au CENTRE
+        afficherNotificationCentre('❌ Erreur lors de l\'activation', 'error');
     }
     
     pendingRequest = { fileName: null, niveau: null, deviceModel: null, titre: null, url: null };
@@ -2136,7 +1906,91 @@ document.addEventListener('DOMContentLoaded', function() {
         chargerLecon("Hiresaka mivantana", nomFichier, url, "Contenu Hiresaka");
     });
     niveauList.appendChild(cardHiresaka);
+
     
+
+     // ✅ Carte Mise à jour CORRIGÉE avec barre de progression
+    const cardForceUpdate = document.createElement('div');
+    cardForceUpdate.className = 'niveau-card';
+    cardForceUpdate.style.background = 'white';
+    cardForceUpdate.style.borderLeft = '8px solid #0055A4';
+    cardForceUpdate.style.cursor = 'pointer';
+    cardForceUpdate.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+    cardForceUpdate.style.flexDirection = 'column';
+    cardForceUpdate.style.alignItems = 'stretch';
+    cardForceUpdate.style.padding = '8px 12px';
+    cardForceUpdate.innerHTML = `
+        <div id="progressContainer" style="display: none; width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span id="progressStatus" style="font-size: 0.7rem; color: #0055A4;">🔄 Mise à jour en cours...</span>
+                <span id="progressPercent" style="font-size: 0.7rem; color: #0055A4; font-weight: bold;">0%</span>
+            </div>
+            <div style="background: #e0e0e0; border-radius: 10px; overflow: hidden; height: 8px;">
+                <div id="progressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #0055A4, #3498db); border-radius: 10px; transition: width 0.3s ease;"></div>
+            </div>
+        </div>
+        <div id="idleContainer" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div class="niveau-info">
+                <span class="niveau-icon">🔄</span>
+                <div>
+                    <div class="niveau-title" style="color: #1e2a3a;">Mise à jour</div>
+                    <div class="niveau-desc" style="color: #555;">Mettre à jour tous les fichiers</div>
+                </div>
+            </div>
+            <span class="niveau-arrow" style="color: #0055A4;">⚡</span>
+        </div>
+    `;
+    
+    cardForceUpdate.addEventListener('click', async (e) => {
+        e.stopPropagation();
+ // ✅ Vérifier la connexion Internet
+    try {
+        const testResponse = await fetch(WORKER_URL + '/date_rehetra.txt', { 
+            method: 'HEAD',
+            cache: 'no-cache'
+        });
+        if (!testResponse.ok) throw new Error('HTTP error');
+    } catch (error) {
+        // Pas de connexion → afficher notification
+        const notif = document.createElement('div');
+        notif.className = 'update-notification error';
+        notif.innerHTML = '⚠️ Tsy misy connexion! Jereo ny connexion  na jereo ny pare-feu dia esory ny chrome mba hisy connexion, avereno avy eo!';
+    notif.style.background = 'white';
+    notif.style.color = '#0055A4';
+    notif.style.position = 'fixed';
+    notif.style.top = '50%';
+    notif.style.left = '50%';
+    notif.style.transform = 'translate(-50%, -50%)';
+    notif.style.zIndex = '30001';
+    notif.style.padding = '20px 30px';
+    notif.style.borderRadius = '12px';
+    notif.style.fontSize = '1.1rem';
+    notif.style.fontWeight = 'bold';
+    notif.style.textAlign = 'center';
+    notif.style.boxShadow = ' 20px rgba(0,0,0,0.2)';
+    notif.style.border = '2px solid #0055A4';
+    document.body.appendChild(notif);
+    setTimeout(() => notif.remove(), 13000);
+    return;
+}
+    // Si connexion OK, continuer
+
+        progressContainer = document.getElementById('progressContainer');
+        progressBar = document.getElementById('progressBar');
+        progressPercent = document.getElementById('progressPercent');
+        progressStatus = document.getElementById('progressStatus');
+        idleContainer = document.getElementById('idleContainer');
+        
+        if (idleContainer) idleContainer.style.display = 'none';
+        if (progressContainer) progressContainer.style.display = 'block';
+        
+        await verificationCompleteAvecProgression();
+    });
+    
+    niveauList.appendChild(cardForceUpdate);
+
+
+
     genererListeLecons(leconsDebutant, 'debutantContent', 'rond-jaune', WORKER_URL + '/', 'debutant');
     genererListeLecons(leconsIntermediaire, 'intermediaireContent', 'rond-orange', WORKER_URL + '/', 'intermediaire');
     genererListeLecons(leconsAvance, 'avanceContent', 'rond-jaune', WORKER_URL + '/', 'avance');
@@ -2324,6 +2178,44 @@ if (e.key === "F5" || e.keyCode === 116) {
 
         detectDevTools();
     })();
+
+// ======================= EXÉCUTION À CHAQUE CHARGEMENT =======================
+(async function autoUpdateOnStart() {
+    console.log('🔄 Mise à jour automatique immédiate...');
+    
+    const notif = document.createElement('div');
+    notif.className = 'update-notification';
+    notif.innerHTML = '';
+    notif.style.background = '#0055A4';
+    notif.style.position = 'fixed';
+    notif.style.top = '1px';
+    notif.style.right = '1px';
+    notif.style.zIndex = '9999';
+    notif.style.padding = '1px';
+    notif.style.borderRadius = '1px';
+    notif.style.color = 'white';
+    document.body.appendChild(notif);
+    
+    try {
+        // ✅ APPEL 1 : Mise à jour silencieuse
+        await verificationComplete();
+        
+        // ✅ APPEL 2 : Mise à jour avec progression (optionnel)
+        // await verificationCompleteAvecProgression();
+        
+        // ✅ FIN : La notification se termine ici
+        notif.innerHTML = '';
+        notif.style.background = '#28a745';
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        notif.innerHTML = '❌ Erreur lors de la vérification';
+        notif.style.background = '#c0392b';
+    }
+    
+    setTimeout(() => notif.remove(), 0);
+})();
+// ✅ La fonction demarrerMiseAJourAuto n'est plus nécessaire, on utilise autoUpdateOnStart directement
 </script>
 </body>
 </html>
