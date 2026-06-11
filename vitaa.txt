@@ -26,30 +26,30 @@
             padding: 0;
         }
         
-        /* Écran de chargement */
-        .loader-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: opacity 0.5s;
-        }
+       /* Écran de chargement */
+.loader-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #0a0a2a 0%, #1a1a4e 100%);  /* ← Dégradé bleu nuit */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    transition: opacity 0.5s;
+}
         
         .loader-card {
-            background: white;
-            border-radius: 32px;
-            padding: 50px 40px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 350px;
-            width: 90%;
-        }
+    background: #1a1a3e;  /* Bleu nuit */
+    border-radius: 32px;
+    padding: 50px 40px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 350px;
+    width: 90%;
+}
         
         .spinner {
             width: 50px;
@@ -101,7 +101,7 @@
         }
         
         .error-card {
-            background: white;
+            background: black;
             border-radius: 32px;
             padding: 40px;
             text-align: center;
@@ -139,13 +139,13 @@
     
     <script>
         // ==================== CONFIGURATION ====================
-        const FILE_URL = 'https://apkhtml.ahofaly62.workers.dev/hirnay.txt';
-        const DATE_INFO_URL = 'https://apkhtml.ahofaly62.workers.dev/date_rehetra.txt';
-        const TARGET_FILE = 'hirnay.txt';
-        const DB_NAME = 'fhirnay_cache';
-        const STORE_NAME = 'fhirnay_contenus';
-        const CACHE_KEY = 'fhirnay_content';
-        const VERSION_KEY = 'fhirnay_version';
+        const FILE_URL = 'https://apkhtml.ahofaly62.workers.dev/hirpasse.txt';
+        const DATE_INFO_URL = 'https://apkhtml.ahofaly62.workers.dev/date_mise_a_jour.txt';
+        const TARGET_FILE = 'hirpasse.txt';
+        const DB_NAME = 'faharoa_cache';
+        const STORE_NAME = 'faharoa_contenus';
+        const CACHE_KEY = 'faharoa_content';
+        const VERSION_KEY = 'faharoa_version';
         
         let currentContent = null;
         let currentVersionDate = null;
@@ -231,42 +231,31 @@
             }
         }
         
-     // ==================== EXTRAIRE LA DATE DE VERSION DISTANTE ====================
-async function getRemoteVersionDate() {
-    try {
-        console.log("🌐 Vérification version distante...");
-        const response = await fetch(DATE_INFO_URL, { cache: 'no-cache' });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const content = await response.text();
-        
-        // Chercher le bloc avec le format EXACT
-        const blocks = content.split(/DERNIÈRE MISE À JOUR/);
-        
-        for (const block of blocks) {
-            // Vérifier le nom du fichier
-            const fileMatch = block.match(/📁 Fichier:\s*([^\n]+)/);
-            if (fileMatch && fileMatch[1].trim() === TARGET_FILE) {
-                
-                // Format EXACT : 📅 sur une ligne, ⏰ sur la ligne suivante
-                const dayMatch = block.match(/📅\s*([\d\/]+)/);
-                const timeMatch = block.match(/⏰\s*([\d:]+)/);
-                
-                if (dayMatch && timeMatch) {
-                    const versionDate = `${dayMatch[1]} ${timeMatch[1]}`;
-                    console.log("📅 Date trouvée:", versionDate);
-                    return versionDate;
+        // ==================== EXTRAIRE LA DATE DE VERSION DISTANTE ====================
+        async function getRemoteVersionDate() {
+            try {
+                console.log("🌐 Vérification version distante...");
+                const response = await fetch(DATE_INFO_URL, { cache: 'no-cache' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const content = await response.text();
+                const blocks = content.split(/DERNIÈRE MISE À JOUR/);
+                for (const block of blocks) {
+                    const fileMatch = block.match(/📁 Fichier:\s*([^\n]+)/);
+                    if (fileMatch && fileMatch[1].trim() === TARGET_FILE) {
+                        const dateMatch = block.match(/📆\s*([\d\/]+\s+[\d:]+)/);
+                        if (dateMatch) return dateMatch[1].trim();
+                        const dayMatch = block.match(/📅\s*([\d\/]+)/);
+                        const timeMatch = block.match(/⏰\s*([\d:]+)/);
+                        if (dayMatch && timeMatch) return `${dayMatch[1]} ${timeMatch[1]}`;
+                    }
                 }
+                return null;
+            } catch (error) {
+                console.warn("Impossible de récupérer la version distante:", error);
+                return null;
             }
         }
         
-        console.warn(`⚠️ Format non trouvé pour ${TARGET_FILE}`);
-        return null;
-        
-    } catch (error) {
-        console.warn("Impossible de récupérer la version distante:", error);
-        return null;
-    }
-}
         // ==================== AFFICHAGE DU CONTENU ====================
         function afficherContenu(htmlContent) {
             // Cacher le loader
@@ -314,7 +303,7 @@ async function getRemoteVersionDate() {
                 }
                 
                 console.log("🌐 Téléchargement depuis:", FILE_URL);
-                if (progressText) progressText.innerText = 'Téléchargement...';
+                if (progressText) progressText.innerText = '';
                 
                 const response = await fetch(FILE_URL, {
                     method: 'GET',
@@ -386,7 +375,7 @@ async function getRemoteVersionDate() {
             if (loaderContainer) {
                 loaderContainer.innerHTML = `
                     <div class="error-card">
-                        <h2>⚠️ Erreur</h2>
+                        <h2>⚠️ Misy problème kely, mety réseau gamba,jereo oe!</h2>
                         <p>${message}</p>
                         <button onclick="location.reload()">Réessayer</button>
                     </div>
