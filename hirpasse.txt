@@ -140,13 +140,13 @@
     
     <script>
         // ==================== CONFIGURATION ====================
-        const FILE_URL = 'https://passage.ahofaly62.workers.dev/hirnay.txt';
+        const FILE_URL = 'https://passage.ahofaly62.workers.dev/hirenay.txt';
         const DATE_INFO_URL = 'https://passage.ahofaly62.workers.dev/date_rehetra.txt';
-        const TARGET_FILE = 'hirnay.txt';
-        const DB_NAME = 'fhirnay_cache';
-        const STORE_NAME = 'fhirnay_contenus';
-        const CACHE_KEY = 'fhirnay_content';
-        const VERSION_KEY = 'fhirnay_version';
+        const TARGET_FILE = 'hirenay.txt';
+        const DB_NAME = 'fhirenay_cache';
+        const STORE_NAME = 'fhirenay_contenus';
+        const CACHE_KEY = 'fhirenay_content';
+        const VERSION_KEY = 'fhirenay_version';
         
         let currentContent = null;
         let currentVersionDate = null;
