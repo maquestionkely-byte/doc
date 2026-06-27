@@ -1,5 +1,5 @@
 DERNIÈRE MISE À JOUR
-📅 12/06/2026
+📅 27/06/2026
 ⏰ 15:36:23
 📆 12/06/2026 15:36:23
 📁 Fichier: vitaa.txt
@@ -9,9 +9,3 @@ DERNIÈRE MISE À JOUR
 ⏰ 15:34:51
 📆 12/06/2026 15:34:51
 📁 Fichier: hirpasse.txt
-
-DERNIÈRE MISE À JOUR
-📅 12/06/2026
-⏰ 10:51:28
-📆 12/06/2026 10:51:28
-📁 Fichier: diconaka - FRANCAIS.txt
